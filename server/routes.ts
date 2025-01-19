@@ -120,7 +120,7 @@ export function registerRoutes(app: Express): Server {
       .returning();
     res.json(item[0]);
   });
-
+ 
   // Enhanced weather route with more data points
   app.get("/api/weather", async (req, res) => {
     try {
