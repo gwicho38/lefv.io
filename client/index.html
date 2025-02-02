@@ -1,11 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  </head>
-  <body>
-    <div id="root"></div>
+    <style>
+        html,
+        body {
+            overflow: hidden;
+            margin-left: 5vh;
+            margin-right: 5vh;
+        }
+        /* Add custom percentages since Tailwind doesn't have these by default */
+        .h-1p {
+            height: 1%;
+        }
+        .h-90p {
+            height: 90%;
+        }
+    </style>
+</head>
+<body class="h-screen flex flex-col">
+    <!-- Header takes up 1% -->
+    <header class="h-1p"></header>
+    
+    <!-- Main content takes up 90% -->
+    <main class="h-90p overflow-hidden">
+        <div id="root" class="h-full w-full"></div>
+    </main>
+    
+    <!-- Footer takes up 1% -->
+    <footer class="h-1p"></footer>
+
     <script type="module" src="/src/main.tsx"></script>
-  </body>
+</body>
 </html>

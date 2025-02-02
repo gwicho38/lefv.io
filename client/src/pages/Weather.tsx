@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { WeatherCard } from "@/components/weather/WeatherCard";
+import { WeatherCard, WeatherMetric } from "@/components/weather/WeatherCard";
 import { WeatherChart } from "@/components/weather/WeatherChart";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -44,37 +44,37 @@ export default function Weather() {
       label: "Temperature",
       value: data.temperature,
       unit: "°F",
-      icon: "temperature"
+      icon: "temperature" as const
     },
     {
       label: "Feels Like",
       value: data.feelsLike,
       unit: "°F",
-      icon: "temperature"
+      icon: "temperature" as const
     },
     {
       label: "Humidity",
       value: data.humidity,
       unit: "%",
-      icon: "humidity"
+      icon: "humidity" as const
     },
     {
       label: "Wind Speed",
       value: data.windSpeed,
       unit: "mph",
-      icon: "wind"
+      icon: "wind" as const
     },
     {
       label: "Pressure",
       value: data.pressure,
       unit: "inHg",
-      icon: "pressure"
+      icon: "pressure" as const
     },
     {
       label: "Dew Point",
       value: data.dewPoint,
       unit: "°F",
-      icon: "temperature"
+      icon: "temperature" as const
     }
   ] : [];
 
@@ -96,7 +96,7 @@ export default function Weather() {
         <TabsContent value="current" className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {metrics.map((metric) => (
-              <WeatherCard key={metric.label} metric={metric} />
+              <WeatherCard key={metric.label} metric={metric as WeatherMetric} />
             ))}
           </div>
 

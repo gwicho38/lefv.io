@@ -80,6 +80,8 @@ watcher
 export function registerRoutes(app: Express): Server {
   // Blog routes
   app.get("/api/posts", async (req, res) => {
+    console.log(req);
+    console.log(res);
     const allPosts = await db.query.posts.findMany({
       orderBy: [desc(posts.createdAt)],
       with: {
@@ -101,24 +103,10 @@ export function registerRoutes(app: Express): Server {
   });
 
   app.get("/api/tags", async (req, res) => {
+    console.log(req);
+    console.log(res);
     const allTags = await db.query.tags.findMany();
     res.json(allTags);
-  });
-
-  // Gallery routes
-  app.get("/api/gallery", async (req, res) => {
-    const items = await db.query.galleries.findMany({
-      orderBy: [desc(galleries.createdAt)]
-    });
-    res.json(items);
-  });
-
-  app.post("/api/gallery", async (req, res) => {
-    const { title, imageUrl, description } = req.body;
-    const item = await db.insert(galleries)
-      .values({ title, imageUrl, description })
-      .returning();
-    res.json(item[0]);
   });
  
   // Enhanced weather route with more data points

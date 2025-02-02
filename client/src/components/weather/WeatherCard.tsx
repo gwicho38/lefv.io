@@ -7,7 +7,7 @@ import {
   CloudRain
 } from "lucide-react";
 
-type WeatherMetric = {
+export type WeatherMetric = {
   label: string;
   value: number | string;
   unit: string;

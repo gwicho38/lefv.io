@@ -7,7 +7,6 @@ export function Navigation() {
   const links = [
     { href: "/", label: "Home" },
     { href: "/blog", label: "Blog" },
-    { href: "/gallery", label: "Gallery" },
     { href: "/weather", label: "Weather" }
   ];
 
