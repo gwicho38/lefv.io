@@ -13,8 +13,4 @@ This is a sample blog post written in markdown. You can use all standard markdow
 - Lists and sublists
 - Code blocks
 
-```javascript
-console.log('Hello, World!');
-```
-
 Enjoy writing in markdown!

@@ -10,6 +10,7 @@ import { marked } from "marked";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
 import chokidar from "chokidar";
+import { log } from "console";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -31,7 +32,7 @@ async function processMarkdownFile(filePath: string) {
   try {
     const fileContents = fs.readFileSync(filePath, 'utf8');
     const { data, content } = matter(fileContents);
-    const html = marked(content);
+    const html = await marked(content);
 
     // Insert or update post in database
     const [post] = await db.insert(posts).values({
@@ -80,26 +81,30 @@ watcher
 export function registerRoutes(app: Express): Server {
   // Blog routes
   app.get("/api/posts", async (req, res) => {
-    console.log(req);
-    console.log(res);
-    const allPosts = await db.query.posts.findMany({
-      orderBy: [desc(posts.createdAt)],
-      with: {
-        postTags: {
-          with: {
-            tag: true
+    console.log(process.env.DATABASE_URL)
+    try {
+      const allPosts = await db.query.posts.findMany({
+        orderBy: [desc(posts.createdAt)],
+        with: {
+          postTags: {
+            with: {
+              tag: true
+            }
           }
         }
-      }
-    });
+      });
 
-    // Transform the data to match the expected format
-    const transformedPosts = allPosts.map(post => ({
-      ...post,
-      tags: post.postTags.map(pt => pt.tag)
-    }));
+      // Transform the data to match the expected format
+      const transformedPosts = allPosts.map(post => ({
+        ...post,
+        tags: post.postTags.map(pt => pt.tag)
+      }));
 
-    res.json(transformedPosts);
+      res.json(transformedPosts);
+    } catch (error) {
+      log(error);
+      res.status(500).json({ error: "Failed to fetch posts" });
+    }
   });
 
   app.get("/api/tags", async (req, res) => {
