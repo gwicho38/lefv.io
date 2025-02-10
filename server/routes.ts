@@ -29,6 +29,7 @@ const watcher = chokidar.watch(POSTS_DIRECTORY, {
 
 // Function to process markdown files and update database
 async function processMarkdownFile(filePath: string) {
+  return;
   try {
     const fileContents = fs.readFileSync(filePath, 'utf8');
     const { data, content } = matter(fileContents);
