@@ -40,10 +40,11 @@ export function BlogPost({ post }: BlogPostProps) {
         </div>
       </CardHeader>
       <CardContent>
-        <div className="prose prose-sm dark:prose-invert">
-          <p className="text-muted-foreground whitespace-pre-wrap">
-            {post.content}
-          </p>
+        <div className="prose prose-sm dark:prose-invert max-w-none">
+          <div 
+            dangerouslySetInnerHTML={{ __html: post.content }}
+            className="text-muted-foreground"
+          />
         </div>
       </CardContent>
     </Card>

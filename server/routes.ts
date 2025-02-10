@@ -29,36 +29,41 @@ const watcher = chokidar.watch(POSTS_DIRECTORY, {
 
 // Function to process markdown files and update database
 async function processMarkdownFile(filePath: string) {
-  return;
   try {
     const fileContents = fs.readFileSync(filePath, 'utf8');
     const { data, content } = matter(fileContents);
     const html = await marked(content);
 
     // Insert or update post in database
-    const [post] = await db.insert(posts).values({
-      title: data.title || path.basename(filePath, '.md'),
-      content: html,
-      createdAt: data.date ? new Date(data.date) : new Date(),
-      updatedAt: new Date()
-    }).onConflictDoUpdate({
-      target: posts.title,
-      set: {
+    const [post] = await db.insert(posts)
+      .values({
+        title: data.title || path.basename(filePath, '.md'),
         content: html,
+        createdAt: data.date ? new Date(data.date) : new Date(),
         updatedAt: new Date()
-      }
-    }).returning();
+      })
+      .onConflictDoUpdate({
+        target: posts.title, // Use the column reference instead of string
+        set: {
+          content: html,
+          updatedAt: new Date()
+        }
+      })
+      .returning();
 
     // Process tags if present
     if (data.tags && Array.isArray(data.tags)) {
       // First remove existing tags for this post
       await db.delete(postTags).where(eq(postTags.postId, post.id));
-
+      
       // Add new tags
       for (const tagName of data.tags) {
         const [tag] = await db.insert(tags)
           .values({ name: tagName })
-          .onConflictDoUpdate({ target: tags.name, set: { name: tagName } })
+          .onConflictDoUpdate({
+            target: tags.name, // Use the column reference here too
+            set: { name: tagName }
+          })
           .returning();
 
         await db.insert(postTags)
