@@ -81,7 +81,7 @@ export default function Weather() {
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">Weather Station</h1>
+        <h1 className="text-3xl font-bold">Ambient Weather Network</h1>
         <p className="text-sm text-muted-foreground">
           Last updated: {new Date().toLocaleTimeString()}
         </p>
