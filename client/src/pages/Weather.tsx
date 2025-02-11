@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { WeatherCard, WeatherMetric } from "@/components/weather/WeatherCard";
 import { WeatherChart } from "@/components/weather/WeatherChart";
@@ -28,12 +27,16 @@ export default function Weather() {
 
   if (isLoading) {
     return (
-      <div className="space-y-4">
-        <Skeleton className="h-8 w-48" />
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {[...Array(6)].map((_, i) => (
-            <Skeleton key={i} className="h-32" />
-          ))}
+      <div className="h-screen flex flex-col overflow-hidden p-6">
+        <div className="flex-none">
+          <Skeleton className="h-8 w-48" />
+        </div>
+        <div className="flex-1 overflow-auto mt-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[...Array(6)].map((_, i) => (
+              <Skeleton key={i} className="h-32" />
+            ))}
+          </div>
         </div>
       </div>
     );
@@ -78,83 +81,74 @@ export default function Weather() {
     }
   ] : [];
 
+  const precipitationMetrics = data ? [
+    {
+      label: "Hourly Rain",
+      value: data.hourlyrainin,
+      unit: "in",
+      icon: "rain" as const
+    },
+    {
+      label: "Daily Rain",
+      value: data.dailyrainin,
+      unit: "in",
+      icon: "rain" as const
+    },
+    {
+      label: "Weekly Rain",
+      value: data.weeklyrainin,
+      unit: "in",
+      icon: "rain" as const
+    },
+    {
+      label: "Monthly Rain",
+      value: data.monthlyrainin,
+      unit: "in",
+      icon: "rain" as const
+    }
+  ] : [];
+
   return (
-    <div className="space-y-8">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">Ambient Weather Network</h1>
-        <p className="text-sm text-muted-foreground">
-          Last updated: {new Date().toLocaleTimeString()}
-        </p>
+    <div className="h-screen flex flex-col overflow-hidden p-6">
+      {/* Header section - fixed */}
+      <div className="flex-none space-y-8">
+        <div className="flex items-center justify-between">
+          <h1 className="text-3xl font-bold">How's the weather?</h1>
+          <p className="text-sm text-muted-foreground">
+            Last updated: {new Date().toLocaleTimeString()}
+          </p>
+        </div>
       </div>
 
-      <Tabs defaultValue="current" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="current">Current Conditions</TabsTrigger>
-          <TabsTrigger value="precipitation">Precipitation</TabsTrigger>
-        </TabsList>
+      {/* Tabs section */}
+      <Tabs defaultValue="current" className="flex-1 flex flex-col overflow-hidden mt-8">
+        <div className="flex-none">
+          <TabsList>
+            <TabsTrigger value="current">Current Conditions</TabsTrigger>
+            <TabsTrigger value="precipitation">Precipitation</TabsTrigger>
+          </TabsList>
+        </div>
 
-        <TabsContent value="current" className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {metrics.map((metric) => (
-              <WeatherCard key={metric.label} metric={metric as WeatherMetric} />
-            ))}
-          </div>
+        {/* Content section - scrollable */}
+        <div className="flex-1 overflow-auto no-scrollbar mt-8">
+          <TabsContent value="current" className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {metrics.map((metric) => (
+                <WeatherCard key={metric.label} metric={metric as WeatherMetric} />
+              ))}
+            </div>
+            {/* <WeatherChart type="temperature" /> */}
+          </TabsContent>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>24-Hour Temperature Trend</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <WeatherChart />
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="precipitation" className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <WeatherCard
-              metric={{
-                label: "Hourly Rain",
-                value: data?.hourlyrainin || 0,
-                unit: "in",
-                icon: "rain"
-              }}
-            />
-            <WeatherCard
-              metric={{
-                label: "Daily Rain",
-                value: data?.dailyrainin || 0,
-                unit: "in",
-                icon: "rain"
-              }}
-            />
-            <WeatherCard
-              metric={{
-                label: "Weekly Rain",
-                value: data?.weeklyrainin || 0,
-                unit: "in",
-                icon: "rain"
-              }}
-            />
-            <WeatherCard
-              metric={{
-                label: "Monthly Rain",
-                value: data?.monthlyrainin || 0,
-                unit: "in",
-                icon: "rain"
-              }}
-            />
-          </div>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Rainfall History</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <WeatherChart type="precipitation" />
-            </CardContent>
-          </Card>
-        </TabsContent>
+          <TabsContent value="precipitation" className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {precipitationMetrics.map((metric) => (
+                <WeatherCard key={metric.label} metric={metric as WeatherMetric} />
+              ))}
+            </div>
+            {/* <WeatherChart type="precipitation" /> */}
+          </TabsContent>
+        </div>
       </Tabs>
     </div>
   );
