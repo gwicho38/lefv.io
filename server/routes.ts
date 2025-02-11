@@ -55,7 +55,7 @@ async function processMarkdownFile(filePath: string) {
     if (data.tags && Array.isArray(data.tags)) {
       // First remove existing tags for this post
       await db.delete(postTags).where(eq(postTags.postId, post.id));
-      
+
       // Add new tags
       for (const tagName of data.tags) {
         const [tag] = await db.insert(tags)
@@ -119,7 +119,7 @@ export function registerRoutes(app: Express): Server {
     const allTags = await db.query.tags.findMany();
     res.json(allTags);
   });
- 
+
   // Enhanced weather route with more data points
   app.get("/api/weather", async (req, res) => {
     try {

@@ -1,6 +1,14 @@
 import { format } from "date-fns";
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 type Tag = {
   id: number;
@@ -18,8 +26,10 @@ type BlogPostProps = {
 };
 
 export function BlogPost({ post }: BlogPostProps) {
-  return (
-    <Card className="hover:shadow-lg transition-shadow">
+  const [isOpen, setIsOpen] = useState(false);
+
+  const PostContent = ({ isModal = false }: { isModal?: boolean }) => (
+    <Card className={`hover:shadow-lg transition-shadow flex flex-col ${!isModal && 'cursor-pointer'}`}>
       <CardHeader>
         <div className="space-y-2">
           <CardTitle className="text-2xl">{post.title}</CardTitle>
@@ -28,7 +38,7 @@ export function BlogPost({ post }: BlogPostProps) {
               {format(new Date(post.createdAt), "MMMM d, yyyy")}
             </div>
             {post.tags && post.tags.length > 0 && (
-              <div className="flex gap-2">
+              <div className="flex gap-2 flex-wrap">
                 {post.tags.map((tag) => (
                   <Badge key={tag.id} variant="secondary">
                     {tag.name}
@@ -39,7 +49,9 @@ export function BlogPost({ post }: BlogPostProps) {
           </div>
         </div>
       </CardHeader>
-      <CardContent>
+      <CardContent 
+        className={`flex-1 ${isModal ? 'overflow-auto no-scrollbar max-h-[70vh]' : 'overflow-hidden max-h-96'}`}
+      >
         <div className="prose prose-sm dark:prose-invert max-w-none">
           <div 
             dangerouslySetInnerHTML={{ __html: post.content }}
@@ -49,6 +61,22 @@ export function BlogPost({ post }: BlogPostProps) {
       </CardContent>
     </Card>
   );
-}
 
-export default BlogPost;
+  return (
+    <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
+      <AlertDialogTrigger asChild>
+        <div onClick={() => setIsOpen(true)}>
+          <PostContent />
+        </div>
+      </AlertDialogTrigger>
+      <AlertDialogContent className="max-w-4xl h-[90vh] overflow-hidden">
+        <AlertDialogHeader>
+          <AlertDialogTitle className="sr-only">
+            {post.title}
+          </AlertDialogTitle>
+        </AlertDialogHeader>
+        <PostContent isModal={true} />
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+}
