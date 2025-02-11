@@ -29,3 +29,11 @@ Using 'pg' driver for database querying
 [✓] Changes applied
 
 ```
+
+## Working with Drizzle DB
+
+Start Drizzle Studio --> `npx drizzle-kit studio`
+
+`https://local.drizzle.studio/`
+
+`https://orm.drizzle.team/docs/kit-overview`
