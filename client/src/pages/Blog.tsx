@@ -39,31 +39,40 @@ export default function Blog() {
 
   if (isLoading) {
     return (
-      <div className="space-y-4">
-        {[...Array(3)].map((_, i) => (
-          <Card key={i} className="animate-pulse">
-            <div className="h-40" />
-          </Card>
-        ))}
+      <div className="h-screen p-6 overflow-hidden">
+        <div className="space-y-4">
+          {[...Array(3)].map((_, i) => (
+            <Card key={i} className="animate-pulse">
+              <div className="h-40" />
+            </Card>
+          ))}
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-8">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Blog Posts</h1>
-      </div>
+    <div className="h-screen flex flex-col overflow-hidden p-6">
+      {/* Header section - fixed height */}
+      <div className="flex-none space-y-8">
+        <div className="flex justify-between items-center">
+          <h1 className="text-3xl font-bold">Blog Posts</h1>
+        </div>
 
-      <div className="space-y-4">
         <TagCloud
           selectedTags={selectedTags}
           onTagClick={handleTagClick}
         />
+      </div>
 
-        <div className="space-y-6">
+      {/* Scrollable content area */}
+      <div className="flex-1 overflow-auto no-scrollbar mt-8">
+        <div className="space-y-6 pb-6">
           {filteredPosts?.map((post) => (
-            <BlogPost key={post.id} post={post} />
+            <BlogPost 
+              key={post.id} 
+              post={post}
+            />
           ))}
 
           {filteredPosts?.length === 0 && (
