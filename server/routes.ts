@@ -41,15 +41,13 @@ async function processMarkdownFile(filePath: string) {
         content: html,
         createdAt: data.date ? new Date(data.date) : new Date(),
         updatedAt: new Date()
-      })
-      .onConflictDoUpdate({
+      }).onConflictDoUpdate({
         target: posts.title, // Use the column reference instead of string
         set: {
           content: html,
           updatedAt: new Date()
         }
-      })
-      .returning();
+      }).returning();
 
     // Process tags if present
     if (data.tags && Array.isArray(data.tags)) {
