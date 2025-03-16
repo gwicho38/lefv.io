@@ -83,31 +83,60 @@ watcher
   });
 
 export function registerRoutes(app: Express): Server {
+  // // Blog routes
+  // app.get("/api/posts", async (req, res) => {
+  //   console.log(process.env.DATABASE_URL)
+  //   try {
+  //     const allPosts = await db.query.posts.findMany({
+  //       orderBy: [desc(posts.createdAt)],
+  //       with: {
+  //         postTags: {
+  //           with: {
+  //             tag: true
+  //           }
+  //         }
+  //       }
+  //     });
+
+  //     // Transform the data to match the expected format
+  //     const transformedPosts = allPosts.map(post => ({
+  //       ...post,
+  //       tags: post.postTags.map(pt => pt.tag)
+  //     }));
+
+  //     res.json(transformedPosts);
+  //   } catch (error) {
+  //     log(error);
+  //     res.status(500).json({ error: "Failed to fetch posts" });
+  //   }
+  // });
+
   // Blog routes
   app.get("/api/posts", async (req, res) => {
-    console.log(process.env.DATABASE_URL)
+    const BLOG_DIR = path.join(process.cwd(), "content/blog");
     try {
-      const allPosts = await db.query.posts.findMany({
-        orderBy: [desc(posts.createdAt)],
-        with: {
-          postTags: {
-            with: {
-              tag: true
-            }
-          }
-        }
-      });
-
-      // Transform the data to match the expected format
-      const transformedPosts = allPosts.map(post => ({
-        ...post,
-        tags: post.postTags.map(pt => pt.tag)
-      }));
-
-      res.json(transformedPosts);
+      const filenames = await fs.promises.readdir(BLOG_DIR);
+      const posts = await Promise.all(
+        filenames.map(async (filename, index) => {
+          const filePath = path.join(BLOG_DIR, filename);
+          const content = await fs.promises.readFile(filePath, "utf-8");
+          // Properly parse frontmatter using gray-matter
+          const parsed = matter(content);
+          // Extract metadata from filename or content
+          const [title, date] = filename.replace(".md", "").split("_");
+          return {
+            id: index + 1,
+            title: parsed.data.title || filename.replace(".md", "").replace(/-/g, " "),
+            content: parsed.content.trim(), // Ensure frontmatter is removed
+            createdAt: parsed.data.date || new Date().toISOString(),
+            tags: Array.isArray(parsed.data.tags) ? parsed.data.tags : [], // Ensure tags are an array
+          };
+        })
+      );
+  
+      res.status(200).json(posts);
     } catch (error) {
-      log(error);
-      res.status(500).json({ error: "Failed to fetch posts" });
+      res.status(500).json({ error: "Failed to load posts" });
     }
   });
 
