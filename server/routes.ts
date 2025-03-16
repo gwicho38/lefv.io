@@ -120,16 +120,16 @@ export function registerRoutes(app: Express): Server {
         filenames.map(async (filename, index) => {
           const filePath = path.join(BLOG_DIR, filename);
           const content = await fs.promises.readFile(filePath, "utf-8");
-          // Properly parse frontmatter using gray-matter
           const parsed = matter(content);
-          // Extract metadata from filename or content
-          const [title, date] = filename.replace(".md", "").split("_");
+  
           return {
             id: index + 1,
             title: parsed.data.title || filename.replace(".md", "").replace(/-/g, " "),
-            content: parsed.content.trim(), // Ensure frontmatter is removed
+            content: parsed.content.trim(),
             createdAt: parsed.data.date || new Date().toISOString(),
-            tags: Array.isArray(parsed.data.tags) ? parsed.data.tags : [], // Ensure tags are an array
+            tags: Array.isArray(parsed.data.tags)
+              ? parsed.data.tags.map((tag, i) => ({ id: i + 1, name: tag })) // Ensure `{ id, name }`
+              : [],
           };
         })
       );
@@ -138,14 +138,38 @@ export function registerRoutes(app: Express): Server {
     } catch (error) {
       res.status(500).json({ error: "Failed to load posts" });
     }
-  });
+  });  
 
   app.get("/api/tags", async (req, res) => {
-    console.log(req);
-    console.log(res);
-    const allTags = await db.query.tags.findMany();
-    res.json(allTags);
-  });
+    const BLOG_DIR = path.join(process.cwd(), "content/blog");
+    try {
+      const filenames = await fs.promises.readdir(BLOG_DIR);
+  
+      const allTags = new Set<string>();
+  
+      await Promise.all(
+        filenames.map(async (filename) => {
+          const filePath = path.join(BLOG_DIR, filename);
+          const fileContent = await fs.promises.readFile(filePath, "utf-8");
+          const { data } = matter(fileContent);
+          if (data.tags && Array.isArray(data.tags)) {
+            data.tags.forEach((tag: string) => allTags.add(tag));
+          }
+        })
+      );
+  
+      // ✅ Ensure tags have unique IDs
+      const tagsArray = Array.from(allTags).map((tag, index) => ({
+        id: index + 1,
+        name: tag,
+      }));
+  
+      res.json(tagsArray);
+    } catch (error) {
+      console.error("Error fetching tags:", error);
+      res.status(500).json({ error: "Failed to fetch tags" });
+    }
+  });  
 
   // Enhanced weather route with more data points
   app.get("/api/weather", async (req, res) => {

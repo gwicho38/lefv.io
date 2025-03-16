@@ -15,6 +15,11 @@ type TagCloudProps = {
 export function TagCloud({ selectedTags, onTagClick }: TagCloudProps) {
   const { data: tags, isLoading } = useQuery<Tag[]>({
     queryKey: ["/api/tags"],
+    queryFn: async () => {
+      const res = await fetch("/api/tags");
+      if (!res.ok) throw new Error("Failed to fetch tags");
+      return res.json();
+    },
   });
 
   if (isLoading) {

@@ -26,6 +26,11 @@ interface TagSelectorProps {
 export function TagSelector({ selectedTags, onTagClick }: TagSelectorProps) {
     const { data: tags, isLoading } = useQuery<TagType[]>({
         queryKey: ["/api/tags"],
+        queryFn: async () => {
+            const res = await fetch("/api/tags");
+            if (!res.ok) throw new Error("Failed to fetch tags");
+            return res.json();
+        },
     });
 
     const handleClearAll = () => {

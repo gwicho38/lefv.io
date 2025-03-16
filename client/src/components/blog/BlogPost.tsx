@@ -38,7 +38,7 @@ export function BlogPost({ post }: BlogPostProps) {
             <div className="text-sm text-muted-foreground">
               {format(new Date(post.createdAt), "MMMM d, yyyy")}
             </div>
-            {/* {post.tags && post.tags.length > 0 && (
+            {post.tags && post.tags.length > 0 && (
               <div className="flex gap-2 flex-wrap">
                 {post.tags.map((tag) => (
                   <Badge key={tag.id} variant="secondary">
@@ -46,7 +46,7 @@ export function BlogPost({ post }: BlogPostProps) {
                   </Badge>
                 ))}
               </div>
-            )} */}
+            )}
           </div>
         </div>
       </CardHeader>
