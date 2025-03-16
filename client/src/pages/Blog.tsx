@@ -79,31 +79,28 @@ export default function Blog() {
 
   return (
     <div className="h-screen flex flex-col overflow-hidden p-6">
-      {/* <div className="flex-none space-y-8">
-        <div className="flex justify-between items-center">
-          <h1 className="text-3xl font-bold">Blog Posts</h1>
-        </div>
+      {/* Header Section */}
+      <div className="flex-none space-y-8">
+        <h1 className="text-3xl font-bold">Blog Posts</h1>
+        <TagSelector selectedTags={selectedTags} onTagClick={handleTagClick} />
+      </div>
 
-        <div className="flex gap-4">
-          <TagSelector selectedTags={selectedTags} onTagClick={handleTagClick} />
-        </div>
-      </div> */}
-
+      {/* Scrollable Content Section */}
       <div className="flex-1 overflow-auto no-scrollbar mt-8">
         <div className="space-y-6 pb-6">
-          {filteredPosts?.map(post => (
+          {filteredPosts?.map((post) => (
             <BlogPost key={post.id} post={post} />
           ))}
 
-          {/* {filteredPosts?.length === 0 && (
+          {filteredPosts?.length === 0 && (
             <div className="text-center text-muted-foreground py-8">
               {searchQuery.trim()
                 ? "No posts found matching your search and selected tags."
                 : "No posts found for the selected tags."}
             </div>
-          )} */}
+          )}
         </div>
       </div>
-    </div>
+    </div> 
   );
 }
