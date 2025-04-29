@@ -4,6 +4,27 @@
 
 - Need to change max_user_watches to 524288
 
+## CI/CD Pipeline
+
+This project uses GitHub Actions for CI/CD:
+
+- **Continuous Integration**: All pushes and pull requests to the `main` branch trigger linting and tests.
+- **Continuous Deployment**: Successful changes to the `main` branch are automatically deployed to the production server.
+
+### GitHub Actions Workflow
+
+The CI/CD process includes:
+
+1. **Test**: Linting and testing with a Postgres database
+2. **Build**: Creating optimized production build
+3. **Deploy**: Deploying to DigitalOcean server
+
+Run tests locally with:
+```bash
+npm run lint
+npm test
+```
+
 ## Setting Up Drizzle DB
 
 ```
