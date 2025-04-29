@@ -11,7 +11,8 @@
     "start-prod": "NODE_ENV=production node dist/index.js",
     "check": "tsc",
     "push-db": "npx drizzle-kit push",
-    "examine-db": "npx drizzle-kit studio"
+    "examine-db": "npx drizzle-kit studio",
+    "lint": "tsc --noEmit"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",
