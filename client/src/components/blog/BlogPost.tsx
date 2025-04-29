@@ -30,18 +30,18 @@ export function BlogPost({ post }: BlogPostProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   const PostContent = ({ isModal = false }: { isModal?: boolean }) => (
-    <Card className={`hover:shadow-lg transition-shadow flex flex-col ${!isModal && 'cursor-pointer'} w-full`}>
+    <Card className={`hover:shadow-lg transition-shadow flex flex-col ${!isModal && 'cursor-pointer'} w-full max-w-full`}>
       <CardHeader>
         <div className="space-y-2">
           <CardTitle className="text-2xl">{post.title}</CardTitle>
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between flex-wrap gap-2">
             <div className="text-sm text-muted-foreground">
               {format(new Date(post.createdAt), "MMMM d, yyyy")}
             </div>
             {post.tags && post.tags.length > 0 && (
               <div className="flex gap-2 flex-wrap">
                 {post.tags.map((tag) => (
-                  <Badge key={tag.id} variant="secondary">
+                  <Badge key={tag.id} variant="secondary" className="whitespace-nowrap">
                     {tag.name}
                   </Badge>
                 ))}
@@ -53,7 +53,7 @@ export function BlogPost({ post }: BlogPostProps) {
       <CardContent
         className={`flex-1 ${isModal ? 'overflow-auto no-scrollbar max-h-[70vh]' : 'overflow-hidden max-h-96'} w-full`}
       >
-        <div className="prose prose-sm dark:prose-invert max-w-none w-full">
+        <div className="prose prose-sm dark:prose-invert max-w-none w-full overflow-x-auto">
           <ReactMarkdown>{post.content}</ReactMarkdown>
         </div>
       </CardContent>
@@ -68,7 +68,7 @@ export function BlogPost({ post }: BlogPostProps) {
           <PostContent />
         </div>
       </AlertDialogTrigger>
-      <AlertDialogContent className="max-w-4xl w-full h-[90vh] flex flex-col justify-start items-center">
+      <AlertDialogContent className="max-w-4xl w-full max-w-[95vw] h-[90vh] flex flex-col justify-start items-center">
         <AlertDialogHeader className="w-full">
           <AlertDialogTitle className="text-xl font-bold">{post.title}</AlertDialogTitle>
         </AlertDialogHeader>
