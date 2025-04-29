@@ -24,6 +24,12 @@ jobs:
       run: npm run build
       env:
         VITE_APP_ENV: production
+        USE_SUPABASE: 'true'
+        DATABASE_URL: ${{ secrets.SUPABASE_POSTGRES_URL }}
+        NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+        NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        SUPABASE_POSTGRES_URL_DEV: ${{ secrets.SUPABASE_POSTGRES_URL }}
+        SUPABASE_POSTGRES_URL_PROD: ${{ secrets.SUPABASE_POSTGRES_URL }}
     
     - name: Deploy to DigitalOcean
       uses: appleboy/scp-action@master
@@ -43,5 +49,11 @@ jobs:
         key: ${{ secrets.DIGITALOCEAN_SSH_KEY }}
         script: |
           cd /var/www/lefv_io
+          echo "USE_SUPABASE=true" > .env
+          echo "DATABASE_URL=${{ secrets.SUPABASE_POSTGRES_URL }}" >> .env
+          echo "NEXT_PUBLIC_SUPABASE_URL=${{ secrets.SUPABASE_URL }}" >> .env
+          echo "NEXT_PUBLIC_SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}" >> .env
+          echo "SUPABASE_POSTGRES_URL_DEV=${{ secrets.SUPABASE_POSTGRES_URL }}" >> .env
+          echo "SUPABASE_POSTGRES_URL_PROD=${{ secrets.SUPABASE_POSTGRES_URL }}" >> .env
           npm install --production
           pm2 restart lefv_io || pm2 start npm --name "lefv_io" -- start
