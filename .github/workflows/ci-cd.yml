@@ -44,6 +44,9 @@ jobs:
       run: npm test
       env:
         DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db
+        USE_SUPABASE: 'true'
+        NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+        NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
     
   build:
     needs: test
@@ -66,6 +69,9 @@ jobs:
       run: npm run build
       env:
         VITE_APP_ENV: production
+        USE_SUPABASE: 'true'
+        NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+        NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
         
     - name: Upload Build Artifacts
       uses: actions/upload-artifact@v4
@@ -105,5 +111,8 @@ jobs:
         key: ${{ secrets.DIGITALOCEAN_SSH_KEY }}
         script: |
           cd /var/www/lefv_io
+          echo "USE_SUPABASE=true" >> .env
+          echo "NEXT_PUBLIC_SUPABASE_URL=${{ secrets.SUPABASE_URL }}" >> .env
+          echo "NEXT_PUBLIC_SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}" >> .env
           npm install --production
           pm2 restart lefv_io || pm2 start npm --name "lefv_io" -- start
