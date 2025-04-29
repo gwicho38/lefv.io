@@ -2,6 +2,9 @@ import { pgTable, text, serial, timestamp, integer, uniqueIndex } from "drizzle-
 import { relations } from "drizzle-orm";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 
+// Use this schema for Supabase
+// All tables will be created in the public schema
+
 export const posts = pgTable('posts', {
   id: serial('id').primaryKey(),
   title: text('title').notNull(),

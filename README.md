@@ -25,36 +25,66 @@ npm run lint
 npm test
 ```
 
-## Setting Up Drizzle DB
+## Database Configuration
+
+This project supports both local PostgreSQL and Supabase as database providers.
+
+### Setting Up Supabase
+
+1. Create a Supabase project at [supabase.com](https://supabase.com)
+2. Copy your project URL and anon key from the Supabase dashboard
+3. Configure environment variables in `.env`:
 
 ```
-% npx drizzle-kit generate
+# Supabase Configuration
+USE_SUPABASE=true
 
-No config path provided, using default 'drizzle.config.ts'
-Reading config file '/Users/lefv/repos/lefv.io/drizzle.config.ts'
-4 tables
-galleries 5 columns 0 indexes 0 fks
-post_tags 2 columns 0 indexes 2 fks
-posts 5 columns 0 indexes 0 fks
-tags 2 columns 0 indexes 0 fks
+# Supabase credentials
+NEXT_PUBLIC_SUPABASE_URL=https://your-project-id.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 
-[✓] Your SQL migration file ➜ migrations/0000_fresh_tenebrous.sql 🚀
+# Environment
+NODE_ENV=development
+```
 
-(4) ~/repos/lefv.io on main [!]
-% npx drizzle-kit push
+4. Apply the database schema by running the SQL script in the Supabase SQL Editor:
+   - Go to your Supabase Dashboard > SQL Editor
+   - Open the file `migrations/supabase_schema.sql`
+   - Run the script to create all tables and policies
 
-No config path provided, using default 'drizzle.config.ts'
-Reading config file '/Users/lefv/repos/lefv.io/drizzle.config.ts'
-Using 'pg' driver for database querying
-[✓] Pulling schema from database...
-[✓] Changes applied
+### Setting Up Local PostgreSQL
 
+1. Configure environment variables in `.env`:
+
+```
+# Database URL for local PostgreSQL
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/lefv_db
+
+# Supabase Configuration
+USE_SUPABASE=false
+
+# Environment
+NODE_ENV=development
+```
+
+2. Apply migrations:
+
+```bash
+# Generate migration files
+npx drizzle-kit generate
+
+# Apply migrations to the database
+npx drizzle-kit push
 ```
 
 ## Working with Drizzle DB
 
-Start Drizzle Studio --> `npx drizzle-kit studio`
+Start Drizzle Studio to manage your database:
 
-`https://local.drizzle.studio/`
+```bash
+npx drizzle-kit studio
+```
 
-`https://orm.drizzle.team/docs/kit-overview`
+Access Drizzle Studio at: `https://local.drizzle.studio/`
+
+For more information, visit the [Drizzle ORM Documentation](https://orm.drizzle.team/docs/kit-overview)
