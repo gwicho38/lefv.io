@@ -4,6 +4,7 @@ const { Pool } = pkg;
 import * as schema from "@db/schema";
 import dotenv from "dotenv";
 import { createClient } from '@supabase/supabase-js';
+import { NodePgDatabase } from "drizzle-orm/node-postgres";
 
 dotenv.config(); // Load .env file
 
@@ -21,7 +22,7 @@ const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
     ? process.env.SUPABASE_ANON_KEY_PROD 
     : process.env.SUPABASE_ANON_KEY_DEV);
 
-let db;
+let db: NodePgDatabase<typeof schema>;
 
 if (useSupabase && supabaseUrl && supabaseKey) {
   // Use Supabase with a PostgreSQL connection
