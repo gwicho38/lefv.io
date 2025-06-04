@@ -588,7 +588,7 @@ rise of guilds is likely to have increased N because they made each
 individual member of the guild accountable to the other members of the
 guild. Third, the divisions between urban and rural class could have
 decreased N for individuals in aggregate, decreasing urban dwellers
-interconnectedness with rural dwellers, and vise versa.
+interconnectedness with rural dwellers, and vice versa.
 
 The social structure of Agrarian societies increased ∂ overall because
 stratification decreased the credibility of punishment regimes as well
