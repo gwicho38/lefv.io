@@ -9,7 +9,7 @@
 This project uses GitHub Actions for CI/CD:
 
 - **Continuous Integration**: All pushes and pull requests to the `main` branch trigger linting and tests.
-- **Continuous Deployment**: Successful changes to the `main` branch are automatically deployed to the production server.
+- **Continuous Deployment**: Successful changes to the `release` branch are automatically deployed to the production server.
 
 ### GitHub Actions Workflow
 
