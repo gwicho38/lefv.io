@@ -13,13 +13,13 @@ const useSupabase = process.env.USE_SUPABASE === 'true';
 
 // Get environment-specific Supabase credentials
 const env = process.env.NODE_ENV || 'development';
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ||
-  (env === 'production' 
-    ? process.env.SUPABASE_URL_PROD 
+const supabaseUrl = process.env.VITE_SUPABASE_URL ||
+  (env === 'production'
+    ? process.env.SUPABASE_URL_PROD
     : process.env.SUPABASE_URL_DEV);
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
-  (env === 'production' 
-    ? process.env.SUPABASE_ANON_KEY_PROD 
+const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY ||
+  (env === 'production'
+    ? process.env.SUPABASE_ANON_KEY_PROD
     : process.env.SUPABASE_ANON_KEY_DEV);
 
 let db: NodePgDatabase<typeof schema>;
