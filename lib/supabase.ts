@@ -6,12 +6,12 @@ dotenv.config();
 // Define environment settings
 const environments = {
   development: {
-    url: process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL_DEV || '',
-    key: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY_DEV || '',
+    url: process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL_DEV || '',
+    key: process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY_DEV || '',
   },
   production: {
-    url: process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL_PROD || '',
-    key: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY_PROD || '',
+    url: process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL_PROD || '',
+    key: process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY_PROD || '',
   },
 };
 
