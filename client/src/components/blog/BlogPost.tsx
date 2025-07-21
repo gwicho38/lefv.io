@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import {
   AlertDialog,
   AlertDialogContent,
+  AlertDialogDescription,
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
@@ -71,6 +72,9 @@ export function BlogPost({ post }: BlogPostProps) {
       <AlertDialogContent className="max-w-4xl w-full max-w-[95vw] h-[90vh] flex flex-col justify-start items-center">
         <AlertDialogHeader className="w-full">
           <AlertDialogTitle className="text-xl font-bold">{post.title}</AlertDialogTitle>
+          <AlertDialogDescription>
+            Full blog post content with tags and publication date.
+          </AlertDialogDescription>
         </AlertDialogHeader>
         <PostContent isModal={true} />
       </AlertDialogContent>
