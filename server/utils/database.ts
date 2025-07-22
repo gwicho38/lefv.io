@@ -86,18 +86,18 @@ export function validateDatabaseConfig(): { isValid: boolean; errors: string[] }
   const useSupabase = process.env.USE_SUPABASE === 'true';
   
   if (useSupabase) {
-    if (!process.env.VITE_SUPABASE_URL && !process.env.SUPABASE_URL_DEV && !process.env.SUPABASE_URL_PROD) {
-      errors.push('Missing Supabase URL configuration');
+      if (!process.env.VITE_SUPABASE_URL && !process.env.SUPABASE_URL_DEV && !process.env.SUPABASE_URL_PROD) {
+        errors.push('Missing Supabase URL configuration');
+      }
+
+      if (!process.env.VITE_SUPABASE_ANON_KEY && !process.env.SUPABASE_ANON_KEY_DEV && !process.env.SUPABASE_ANON_KEY_PROD) {
+        errors.push('Missing Supabase API key configuration');
+      }
     }
-    
-    if (!process.env.VITE_SUPABASE_ANON_KEY && !process.env.SUPABASE_ANON_KEY_DEV && !process.env.SUPABASE_ANON_KEY_PROD) {
-      errors.push('Missing Supabase API key configuration');
-    }
-  } else {
-    if (!process.env.DATABASE_URL) {
-      errors.push('Missing DATABASE_URL for local PostgreSQL');
-    }
-  }
+  else if (!process.env.DATABASE_URL) {
+        errors.push('Missing DATABASE_URL for local PostgreSQL');
+      }
+
   
   return {
     isValid: errors.length === 0,
