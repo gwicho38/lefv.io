@@ -72,13 +72,11 @@ export function rateLimit(options: RateLimitOptions) {
     
     // Handle successful requests
     if (skipSuccessfulRequests) {
-      const originalSend = res.send;
-      res.send = function(data) {
+      res.on('finish', () => {
         if (res.statusCode < 400) {
           store[key].count--;
         }
-        return originalSend.call(this, data);
-      };
+      });
     }
     
     next();
