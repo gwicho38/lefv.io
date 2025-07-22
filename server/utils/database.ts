@@ -1,4 +1,39 @@
-import { db } from "@db";
+Right now this single file mixes three unrelated concerns and even exports an unused helper. To reduce surface area and keep each module focused, you can:
+
+1. Remove `executeDatabaseOperation` from here until it’s used.
+2. Split the remaining two functions into dedicated files.
+
+Example:
+
+// src/utils/dbConfig.ts
+```ts
+export function validateDatabaseConfig(): { isValid: boolean; errors: string[] } {
+  const errors: string[] = [];
+  const useSupabase = process.env.USE_SUPABASE === 'true';
+
+  if (useSupabase) {
+    if (
+      !process.env.VITE_SUPABASE_URL &&
+      !process.env.SUPABASE_URL_DEV &&
+      !process.env.SUPABASE_URL_PROD
+    ) {
+      errors.push('Missing Supabase URL configuration');
+    }
+    if (
+      !process.env.VITE_SUPABASE_ANON_KEY &&
+      !process.env.SUPABASE_ANON_KEY_DEV &&
+      !process.env.SUPABASE_ANON_KEY_PROD
+    ) {
+      errors.push('Missing Supabase API key configuration');
+    }
+  } else {
+    if (!process.env.DATABASE_URL) {
+      errors.push('Missing DATABASE_URL for local PostgreSQL');
+    }
+  }
+
+  return { isValid: errors.length === 0, errors };
+}
 import type { Response } from 'express';
 import { errorResponse } from './validation';
 
