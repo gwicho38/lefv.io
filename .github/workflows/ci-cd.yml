@@ -108,6 +108,13 @@ jobs:
         echo "Creating deployment archive..."
         tar -czf deploy.tar.gz deploy/
     
+    - name: Test SSH Connection
+      run: |
+        echo "${{ secrets.DIGITALOCEAN_SSH_KEY }}" > /tmp/ssh_key
+        chmod 600 /tmp/ssh_key
+        ssh -i /tmp/ssh_key -o StrictHostKeyChecking=no root@161.35.251.74 "echo 'SSH connection successful'"
+        rm /tmp/ssh_key
+    
     - name: Deploy to DigitalOcean
       uses: appleboy/scp-action@v0.1.7
       with:
