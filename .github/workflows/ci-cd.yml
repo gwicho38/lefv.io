@@ -108,30 +108,22 @@ jobs:
         echo "Creating deployment archive..."
         tar -czf deploy.tar.gz deploy/
     
+    - name: Decode SSH Key
+      run: |
+        echo "${{ secrets.DIGITALOCEAN_SSH_KEY_B64 }}" | base64 -d > /tmp/ssh_key
+        chmod 600 /tmp/ssh_key
+    
     - name: Test SSH Connection
-      uses: appleboy/ssh-action@v1.1.0
-      with:
-        host: 161.35.251.74
-        username: root
-        key: ${{ secrets.DIGITALOCEAN_SSH_KEY }}
-        script: echo 'SSH connection successful'
+      run: |
+        ssh -i /tmp/ssh_key -o StrictHostKeyChecking=no root@161.35.251.74 "echo 'SSH connection successful'"
     
     - name: Deploy to DigitalOcean
-      uses: appleboy/scp-action@v0.1.7
-      with:
-        host: 161.35.251.74
-        username: root
-        key: ${{ secrets.DIGITALOCEAN_SSH_KEY }}
-        source: "deploy.tar.gz"
-        target: "/tmp/"
+      run: |
+        scp -i /tmp/ssh_key -o StrictHostKeyChecking=no deploy.tar.gz root@161.35.251.74:/tmp/
     
     - name: Setup and restart application
-      uses: appleboy/ssh-action@v1.1.0
-      with:
-        host: 161.35.251.74
-        username: root
-        key: ${{ secrets.DIGITALOCEAN_SSH_KEY }}
-        script: |
+      run: |
+        ssh -i /tmp/ssh_key -o StrictHostKeyChecking=no root@161.35.251.74 << 'EOF'
           # Stop existing application
           pm2 stop lefv_io || true
           pm2 delete lefv_io || true
@@ -209,3 +201,7 @@ jobs:
           
           echo "Deployment completed successfully!"
           pm2 status
+        EOF
+        
+        # Clean up SSH key
+        rm -f /tmp/ssh_key
