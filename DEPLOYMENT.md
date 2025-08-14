@@ -135,3 +135,4 @@ Common issues and solutions:
 4. **502 Bad Gateway**: Verify application is running on port 3000
 
 For support, check the GitHub Actions logs and server logs.# Deployment Test
+# Testing deployment after SSH setup
