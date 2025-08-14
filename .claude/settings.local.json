@@ -9,7 +9,12 @@
       "Bash(npm run build:*)",
       "Bash(npm install:*)",
       "Bash(mv:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git push:*)",
+      "Bash(vitest run:*)",
+      "Bash(npx vitest run:*)",
+      "Bash(gh run list:*)",
+      "Bash(gh run view:*)"
     ],
     "defaultMode": "acceptEdits"
   }

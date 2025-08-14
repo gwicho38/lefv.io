@@ -138,16 +138,17 @@ Content 2`;
   });
 
   describe('GET /api/weather', () => {
-    it('should return error when API keys are missing', async () => {
+    it('should return error when no weather services are configured', async () => {
       // Ensure environment variables are not set
       delete process.env.AMBIENT_API_KEY;
       delete process.env.AMBIENT_APP_KEY;
+      delete process.env.OPENWEATHER_API_KEY;
 
       const response = await request(app)
         .get('/api/weather')
         .expect(500);
 
-      expect(response.body).toHaveProperty('error', 'Weather API keys not configured');
+      expect(response.body).toHaveProperty('error', 'Failed to fetch weather data');
     });
   });
 });
