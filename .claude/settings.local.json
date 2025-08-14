@@ -14,7 +14,8 @@
       "Bash(vitest run:*)",
       "Bash(npx vitest run:*)",
       "Bash(gh run list:*)",
-      "Bash(gh run view:*)"
+      "Bash(gh run view:*)",
+      "Bash(git commit:*)"
     ],
     "defaultMode": "acceptEdits"
   }

@@ -105,15 +105,12 @@ describe('useToast', () => {
 
   it('should handle toast with action', () => {
     const { result } = renderHook(() => useToast());
-    const mockAction = {
-      label: 'Undo',
-      onClick: vi.fn()
-    };
+    const mockAction = vi.fn();
 
     act(() => {
       result.current.toast({
         title: 'Toast with action',
-        action: mockAction
+        action: mockAction as any
       });
     });
 

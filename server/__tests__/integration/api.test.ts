@@ -41,11 +41,11 @@ vi.mock('../../utils/database', () => ({
 }));
 
 describe('API Integration Tests', () => {
-  let app: express.Application;
+  let app: express.Express;
   let server: any;
 
   beforeAll(async () => {
-    app = express();
+    app = express() as express.Express;
     app.use(express.json());
     server = registerRoutes(app);
   });
