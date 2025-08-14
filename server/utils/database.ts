@@ -1,12 +1,5 @@
-Right now this single file mixes three unrelated concerns and even exports an unused helper. To reduce surface area and keep each module focused, you can:
+import { logError, logInfo } from './logger';
 
-1. Remove `executeDatabaseOperation` from here until it’s used.
-2. Split the remaining two functions into dedicated files.
-
-Example:
-
-// src/utils/dbConfig.ts
-```ts
 export function validateDatabaseConfig(): { isValid: boolean; errors: string[] } {
   const errors: string[] = [];
   const useSupabase = process.env.USE_SUPABASE === 'true';
@@ -24,7 +17,7 @@ export function validateDatabaseConfig(): { isValid: boolean; errors: string[] }
       !process.env.SUPABASE_ANON_KEY_DEV &&
       !process.env.SUPABASE_ANON_KEY_PROD
     ) {
-      errors.push('Missing Supabase API key configuration');
+      errors.push('Missing Supabase anon key configuration');
     }
   } else {
     if (!process.env.DATABASE_URL) {
@@ -32,75 +25,46 @@ export function validateDatabaseConfig(): { isValid: boolean; errors: string[] }
     }
   }
 
-  return { isValid: errors.length === 0, errors };
-}
-import type { Response } from 'express';
-import { errorResponse } from './validation';
-
-/**
- * Executes a database operation with proper error handling
- */
-export async function executeDatabaseOperation<T>(
-  operation: () => Promise<T>,
-  res: Response,
-  errorMessage: string = "Database operation failed"
-): Promise<T | null> {
-  try {
-    return await operation();
-  } catch (error) {
-    console.error(`${errorMessage}:`, error instanceof Error ? error.message : error);
-    
-    // Check if it's a connection error
-    if (error instanceof Error && error.message.includes('connection')) {
-      errorResponse(res, 503, "Database connection error", { 
-        message: "Please try again later" 
-      });
-    } else {
-      errorResponse(res, 500, errorMessage);
-    }
-    
-    return null;
-  }
-}
-
-/**
- * Checks database health
- */
-export async function checkDatabaseHealth(): Promise<boolean> {
-  try {
-    // Simple query to check if database is accessible
-    await db.query.posts.findFirst();
-    return true;
-  } catch (error) {
-    console.error("Database health check failed:", error instanceof Error ? error.message : error);
-    return false;
-  }
-}
-
-/**
- * Validates required environment variables for database connection
- */
-export function validateDatabaseConfig(): { isValid: boolean; errors: string[] } {
-  const errors: string[] = [];
-  
-  const useSupabase = process.env.USE_SUPABASE === 'true';
-  
-  if (useSupabase) {
-      if (!process.env.VITE_SUPABASE_URL && !process.env.SUPABASE_URL_DEV && !process.env.SUPABASE_URL_PROD) {
-        errors.push('Missing Supabase URL configuration');
-      }
-
-      if (!process.env.VITE_SUPABASE_ANON_KEY && !process.env.SUPABASE_ANON_KEY_DEV && !process.env.SUPABASE_ANON_KEY_PROD) {
-        errors.push('Missing Supabase API key configuration');
-      }
-    }
-  else if (!process.env.DATABASE_URL) {
-        errors.push('Missing DATABASE_URL for local PostgreSQL');
-      }
-
-  
   return {
     isValid: errors.length === 0,
     errors
   };
+}
+
+export async function checkDatabaseHealth(): Promise<boolean> {
+  try {
+    // Import db dynamically to avoid circular dependencies
+    const { db } = await import("../../db");
+    const { sql } = await import("drizzle-orm");
+    
+    // Simple health check query
+    await db.execute(sql`SELECT 1`);
+    return true;
+  } catch (error) {
+    logError('Database health check failed', error);
+    return false;
+  }
+}
+
+export function logDatabaseConnectionInfo(): void {
+  const useSupabase = process.env.USE_SUPABASE === 'true';
+  
+  if (useSupabase) {
+    const supabaseUrl = process.env.VITE_SUPABASE_URL || 
+                       process.env.SUPABASE_URL_DEV || 
+                       process.env.SUPABASE_URL_PROD;
+    
+    if (supabaseUrl) {
+      logInfo('Using Supabase database', {
+        url: supabaseUrl.substring(0, 30) + '...'
+      });
+    }
+  } else {
+    const databaseUrl = process.env.DATABASE_URL;
+    if (databaseUrl) {
+      logInfo('Using local PostgreSQL database', {
+        url: databaseUrl.substring(0, 30) + '...'
+      });
+    }
+  }
 }
