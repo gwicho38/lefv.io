@@ -53,7 +53,8 @@ Add the following secrets to your GitHub repository (Settings → Secrets and va
 2. **SUPABASE_POSTGRES_URL**: Your Supabase database connection string
 3. **SUPABASE_URL**: Your Supabase project URL
 4. **SUPABASE_ANON_KEY**: Your Supabase anonymous key
-5. **OPENWEATHER_API_KEY**: Your OpenWeatherMap API key (optional)
+5. **SUPABASE_JWT_SECRET**: Your Supabase JWT secret (for server-side operations)
+6. **OPENWEATHER_API_KEY**: Your OpenWeatherMap API key (optional)
 
 ### Step 3: Deploy
 

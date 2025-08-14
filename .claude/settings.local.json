@@ -17,7 +17,9 @@
       "Bash(gh run view:*)",
       "Bash(git commit:*)",
       "Bash(ssh-keygen:*)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash(gh run watch:*)",
+      "Bash(true)"
     ],
     "defaultMode": "acceptEdits"
   }
