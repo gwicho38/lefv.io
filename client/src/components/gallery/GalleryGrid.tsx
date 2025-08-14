@@ -3,6 +3,7 @@ import { AspectRatio } from "@/components/ui/aspect-ratio";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -53,6 +54,9 @@ export function GalleryGrid({ items }: GalleryGridProps) {
           <DialogContent className="max-w-3xl">
             <DialogHeader>
               <DialogTitle>{selectedItem.title}</DialogTitle>
+              <DialogDescription>
+                Gallery item details and full description.
+              </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
               <AspectRatio ratio={16/9}>

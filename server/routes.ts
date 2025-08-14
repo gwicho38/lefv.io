@@ -11,6 +11,10 @@ import { fileURLToPath } from "url";
 import { dirname } from "path";
 import chokidar from "chokidar";
 import { log } from "console";
+import { asyncHandler, errorResponse, validateEnvVars } from "./utils/validation";
+import { checkDatabaseHealth, validateDatabaseConfig } from "./utils/database";
+import { rateLimiters } from "./utils/rateLimiter";
+import { z } from "zod";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -69,7 +73,7 @@ async function processMarkdownFile(filePath: string) {
       }
     }
   } catch (error) {
-    console.error(`Error processing markdown file: ${filePath}`, error);
+    console.error(`Error processing markdown file: ${filePath}`, error instanceof Error ? error.message : error);
   }
 }
 
@@ -83,36 +87,32 @@ watcher
   });
 
 export function registerRoutes(app: Express): Server {
-  // // Blog routes
-  // app.get("/api/posts", async (req, res) => {
-  //   console.log(process.env.DATABASE_URL)
-  //   try {
-  //     const allPosts = await db.query.posts.findMany({
-  //       orderBy: [desc(posts.createdAt)],
-  //       with: {
-  //         postTags: {
-  //           with: {
-  //             tag: true
-  //           }
-  //         }
-  //       }
-  //     });
+  // Health check endpoint
+  app.get("/api/health", asyncHandler(async (req, res) => {
+    const dbConfig = validateDatabaseConfig();
+    const dbHealth = dbConfig.isValid ? await checkDatabaseHealth() : false;
+    
+    const health = {
+      status: dbHealth ? "healthy" : "unhealthy",
+      timestamp: new Date().toISOString(),
+      database: {
+        connected: dbHealth,
+        configValid: dbConfig.isValid,
+        errors: dbConfig.errors
+      },
+      environment: process.env.NODE_ENV || 'development'
+    };
+    
+    const statusCode = dbHealth ? 200 : 503;
+    res.status(statusCode).json(health);
+  }));
 
-  //     // Transform the data to match the expected format
-  //     const transformedPosts = allPosts.map(post => ({
-  //       ...post,
-  //       tags: post.postTags.map(pt => pt.tag)
-  //     }));
 
-  //     res.json(transformedPosts);
-  //   } catch (error) {
-  //     log(error);
-  //     res.status(500).json({ error: "Failed to fetch posts" });
-  //   }
-  // });
+  // Apply rate limiting to all API routes
+  app.use("/api", rateLimiters.api);
 
   // Blog routes
-  app.get("/api/posts", async (req, res) => {
+  app.get("/api/posts", asyncHandler(async (req, res) => {
     const BLOG_DIR = path.join(process.cwd(), "content/blog");
     try {
       const filenames = await fs.promises.readdir(BLOG_DIR);
@@ -136,11 +136,12 @@ export function registerRoutes(app: Express): Server {
   
       res.status(200).json(posts);
     } catch (error) {
-      res.status(500).json({ error: "Failed to load posts" });
+      console.error("Error loading blog posts:", error instanceof Error ? error.message : error);
+      return errorResponse(res, 500, "Failed to load posts");
     }
-  });  
+  }));  
 
-  app.get("/api/tags", async (req, res) => {
+  app.get("/api/tags", asyncHandler(async (req, res) => {
     const BLOG_DIR = path.join(process.cwd(), "content/blog");
     try {
       const filenames = await fs.promises.readdir(BLOG_DIR);
@@ -167,17 +168,19 @@ export function registerRoutes(app: Express): Server {
       res.json(tagsArray);
     } catch (error) {
       console.error("Error fetching tags:", error);
-      res.status(500).json({ error: "Failed to fetch tags" });
+      return errorResponse(res, 500, "Failed to fetch tags");
     }
-  });  
+  }));  
 
-  // Enhanced weather route with more data points
-  app.get("/api/weather", async (req, res) => {
+  // Enhanced weather route with more data points (with strict rate limiting)
+  app.get("/api/weather", rateLimiters.strict, asyncHandler(async (req, res) => {
     try {
-      if (!process.env.AMBIENT_API_KEY || !process.env.AMBIENT_APP_KEY) {
-        return res.status(500).json({ error: "Weather API keys not configured" });
-      }
+      validateEnvVars(['AMBIENT_API_KEY', 'AMBIENT_APP_KEY']);
+    } catch (error) {
+      return errorResponse(res, 500, "Weather API keys not configured");
+    }
 
+    try {
       const response = await fetch(
         `https://api.ambientweather.net/v1/devices?apiKey=${process.env.AMBIENT_API_KEY}&applicationKey=${process.env.AMBIENT_APP_KEY}`
       );
@@ -208,16 +211,26 @@ export function registerRoutes(app: Express): Server {
         lastRain: lastData.lastRain || null
       });
     } catch (error) {
-      res.status(500).json({ error: "Failed to fetch weather data" });
+      console.error("Weather API error:", error instanceof Error ? error.message : error);
+      return errorResponse(res, 500, "Failed to fetch weather data");
     }
-  });
+  }));
 
-  app.get("/api/weather/history/:type", async (req, res) => {
+  app.get("/api/weather/history/:type", rateLimiters.strict, asyncHandler(async (req, res) => {
     try {
-      if (!process.env.AMBIENT_API_KEY || !process.env.AMBIENT_APP_KEY || !process.env.AMBIENT_MAC_ADDRESS) {
-        return res.status(500).json({ error: "Weather API keys or MAC address not configured" });
-      }
+      validateEnvVars(['AMBIENT_API_KEY', 'AMBIENT_APP_KEY', 'AMBIENT_MAC_ADDRESS']);
+    } catch (error) {
+      return errorResponse(res, 500, "Weather API keys or MAC address not configured");
+    }
 
+    const { type } = req.params;
+    
+    // Validate the type parameter
+    if (!['temperature', 'precipitation'].includes(type)) {
+      return errorResponse(res, 400, "Invalid type parameter. Must be 'temperature' or 'precipitation'");
+    }
+
+    try {
       const endDate = new Date();
       const startDate = new Date(endDate.getTime() - 24 * 60 * 60 * 1000);
 
@@ -242,9 +255,10 @@ export function registerRoutes(app: Express): Server {
 
       res.json(transformedData);
     } catch (error) {
-      res.status(500).json({ error: "Failed to fetch historical weather data" });
+      console.error("Weather history API error:", error instanceof Error ? error.message : error);
+      return errorResponse(res, 500, "Failed to fetch historical weather data");
     }
-  });
+  }));
 
   const httpServer = createServer(app);
   return httpServer;
