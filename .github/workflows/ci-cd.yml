@@ -53,7 +53,7 @@ jobs:
   build:
     needs: test
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/release')
     
     steps:
     - uses: actions/checkout@v4
@@ -84,43 +84,119 @@ jobs:
         name: build-artifacts
         path: dist/
         
-  # deploy:
-  #   needs: build
-  #   runs-on: ubuntu-latest
-  #   if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/release'
     
-  #   steps:
-  #   - uses: actions/checkout@v4
+    steps:
+    - uses: actions/checkout@v4
     
-  #   - name: Download Build Artifacts
-  #     uses: actions/download-artifact@v4
-  #     with:
-  #       name: build-artifacts
-  #       path: dist/
+    - name: Download Build Artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: build-artifacts
+        path: dist/
     
-  #   - name: Deploy to DigitalOcean
-  #     uses: appleboy/scp-action@master
-  #     with:
-  #       host: ${{ secrets.DIGITALOCEAN_HOST }}
-  #       username: ${{ secrets.DIGITALOCEAN_USERNAME }}
-  #       key: ${{ secrets.DIGITALOCEAN_SSH_KEY }}
-  #       source: "dist/"
-  #       target: "/var/www/lefv_io"
-  #       strip_components: 1
-
-  #   - name: Restart Application
-  #     uses: appleboy/ssh-action@master
-  #     with:
-  #       host: ${{ secrets.DIGITALOCEAN_HOST }}
-  #       username: ${{ secrets.DIGITALOCEAN_USERNAME }}
-  #       key: ${{ secrets.DIGITALOCEAN_SSH_KEY }}
-  #       script: |
-  #         cd /var/www/lefv_io
-  #         echo "USE_SUPABASE=true" > .env
-  #         echo "DATABASE_URL=${{ secrets.SUPABASE_POSTGRES_URL }}" >> .env
-  #         echo "VITE_SUPABASE_URL=${{ secrets.SUPABASE_URL }}" >> .env
-  #         echo "VITE_SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}" >> .env
-  #         echo "SUPABASE_POSTGRES_URL_DEV=${{ secrets.SUPABASE_POSTGRES_URL }}" >> .env
-  #         echo "SUPABASE_POSTGRES_URL_PROD=${{ secrets.SUPABASE_POSTGRES_URL }}" >> .env
-  #         npm install --production
-  #         pm2 restart lefv_io || pm2 start npm --name "lefv_io" -- start
+    - name: Create deployment package
+      run: |
+        mkdir -p deploy
+        cp -r dist/* deploy/
+        cp package*.json deploy/
+        cp docker-compose.yml deploy/ || true
+        cp Dockerfile deploy/ || true
+        echo "Creating deployment archive..."
+        tar -czf deploy.tar.gz deploy/
+    
+    - name: Deploy to DigitalOcean
+      uses: appleboy/scp-action@v0.1.7
+      with:
+        host: 161.35.251.74
+        username: root
+        key: ${{ secrets.DIGITALOCEAN_SSH_KEY }}
+        source: "deploy.tar.gz"
+        target: "/tmp/"
+    
+    - name: Setup and restart application
+      uses: appleboy/ssh-action@v1.1.0
+      with:
+        host: 161.35.251.74
+        username: root
+        key: ${{ secrets.DIGITALOCEAN_SSH_KEY }}
+        script: |
+          # Stop existing application
+          pm2 stop lefv_io || true
+          pm2 delete lefv_io || true
+          
+          # Backup previous deployment
+          if [ -d "/var/www/lefv_io" ]; then
+            mv /var/www/lefv_io /var/www/lefv_io_backup_$(date +%Y%m%d_%H%M%S)
+          fi
+          
+          # Create application directory
+          mkdir -p /var/www/lefv_io
+          
+          # Extract new deployment
+          cd /var/www/lefv_io
+          tar -xzf /tmp/deploy.tar.gz --strip-components=1
+          rm -f /tmp/deploy.tar.gz
+          
+          # Create environment file
+          cat > .env << EOF
+          NODE_ENV=production
+          PORT=3000
+          USE_SUPABASE=true
+          DATABASE_URL=${{ secrets.SUPABASE_POSTGRES_URL }}
+          VITE_SUPABASE_URL=${{ secrets.SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}
+          SUPABASE_POSTGRES_URL_DEV=${{ secrets.SUPABASE_POSTGRES_URL }}
+          SUPABASE_POSTGRES_URL_PROD=${{ secrets.SUPABASE_POSTGRES_URL }}
+          OPENWEATHER_API_KEY=${{ secrets.OPENWEATHER_API_KEY }}
+          EOF
+          
+          # Install Node.js if not present
+          if ! command -v node &> /dev/null; then
+            curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+            apt-get install -y nodejs
+          fi
+          
+          # Install PM2 if not present
+          if ! command -v pm2 &> /dev/null; then
+            npm install -g pm2
+          fi
+          
+          # Install production dependencies
+          npm install --production --legacy-peer-deps
+          
+          # Start application with PM2
+          pm2 start index.js --name "lefv_io" --env production
+          pm2 save
+          pm2 startup || true
+          
+          # Setup nginx reverse proxy if not configured
+          if [ ! -f "/etc/nginx/sites-available/lefv_io" ]; then
+            cat > /etc/nginx/sites-available/lefv_io << 'NGINX'
+          server {
+              listen 80;
+              server_name lefv.io www.lefv.io;
+              
+              location / {
+                  proxy_pass http://localhost:3000;
+                  proxy_http_version 1.1;
+                  proxy_set_header Upgrade $http_upgrade;
+                  proxy_set_header Connection 'upgrade';
+                  proxy_set_header Host $host;
+                  proxy_set_header X-Real-IP $remote_addr;
+                  proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                  proxy_set_header X-Forwarded-Proto $scheme;
+                  proxy_cache_bypass $http_upgrade;
+              }
+          }
+          NGINX
+            
+            ln -sf /etc/nginx/sites-available/lefv_io /etc/nginx/sites-enabled/
+            nginx -t && systemctl reload nginx
+          fi
+          
+          echo "Deployment completed successfully!"
+          pm2 status
