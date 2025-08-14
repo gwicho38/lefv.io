@@ -19,7 +19,8 @@
       "Bash(ssh-keygen:*)",
       "Bash(cat:*)",
       "Bash(gh run watch:*)",
-      "Bash(true)"
+      "Bash(true)",
+      "Bash(rm:*)"
     ],
     "defaultMode": "acceptEdits"
   }

@@ -30,7 +30,7 @@ sudo ufw --force enable
 
 # Add the public key to authorized_keys
 mkdir -p ~/.ssh
-echo "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIL1jTed1JohOD+srwzP22XsuWgHWpEvjDYh2bR8RYuma github-actions@lefv.io" >> ~/.ssh/authorized_keys
+echo "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHdT5maEyC5so5ZiGnB0KTM/CfjZpmcx2y8YOfrggaSS github-actions@lefv.io" >> ~/.ssh/authorized_keys
 chmod 700 ~/.ssh
 chmod 600 ~/.ssh/authorized_keys
 ```
