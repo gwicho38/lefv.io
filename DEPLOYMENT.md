@@ -138,3 +138,4 @@ For support, check the GitHub Actions logs and server logs.# Deployment Test
 # Testing deployment after SSH setup
 # Testing base64 SSH key approach
 # Testing with corrected base64 SSH key secret
+# Testing with raw SSH key secret using heredoc
