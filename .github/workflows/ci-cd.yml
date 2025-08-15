@@ -109,11 +109,11 @@ jobs:
         tar -czf deploy.tar.gz deploy/
     
     - name: Setup SSH Key
+      env:
+        SSH_PRIVATE_KEY: ${{ secrets.DIGITALOCEAN_SSH_KEY_RAW }}
       run: |
         echo "Setting up SSH key..."
-        cat > /tmp/ssh_key << 'EOF'
-        ${{ secrets.DIGITALOCEAN_SSH_KEY_RAW }}
-        EOF
+        echo "$SSH_PRIVATE_KEY" > /tmp/ssh_key
         chmod 600 /tmp/ssh_key
         echo "Key created, checking format..."
         head -1 /tmp/ssh_key
