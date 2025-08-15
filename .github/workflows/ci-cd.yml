@@ -108,12 +108,14 @@ jobs:
         echo "Creating deployment archive..."
         tar -czf deploy.tar.gz deploy/
     
-    - name: Decode SSH Key
+    - name: Setup SSH Key
       run: |
-        echo "Decoding SSH key..."
-        echo "${{ secrets.DIGITALOCEAN_SSH_KEY_B64 }}" | base64 -d > /tmp/ssh_key
+        echo "Setting up SSH key..."
+        cat > /tmp/ssh_key << 'EOF'
+        ${{ secrets.DIGITALOCEAN_SSH_KEY_RAW }}
+        EOF
         chmod 600 /tmp/ssh_key
-        echo "Key decoded, checking format..."
+        echo "Key created, checking format..."
         head -1 /tmp/ssh_key
         echo "Key permissions:"
         ls -la /tmp/ssh_key
