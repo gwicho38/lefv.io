@@ -115,15 +115,7 @@ jobs:
         echo "Setting up SSH key..."
         echo "$SSH_PRIVATE_KEY" > /tmp/ssh_key
         chmod 600 /tmp/ssh_key
-        echo "Key created, checking format..."
-        head -1 /tmp/ssh_key
-        echo "Key permissions:"
-        ls -la /tmp/ssh_key
-    
-    - name: Test SSH Connection
-      run: |
-        echo "Testing SSH connection..."
-        ssh -i /tmp/ssh_key -o StrictHostKeyChecking=no -v root@161.35.251.74 "echo 'SSH connection successful'"
+        echo "SSH key configured"
     
     - name: Deploy to DigitalOcean
       run: |
