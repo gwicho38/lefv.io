@@ -38,3 +38,11 @@ vite.config.ts.*
 # Database
 *.sqlite
 *.sqlite3
+
+
+#Ignore vscode AI rules
+.github/instructions/codacy.instructions.md
+
+# Keep example env files tracked
+!.env.example
+!.env.*.example
