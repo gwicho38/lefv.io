@@ -14,7 +14,6 @@ type Tag = {
 
 type Post = {
   id: number;
-  slug: string;
   title: string;
   content: string;
   createdAt: string;
@@ -88,7 +87,7 @@ export default function Blog() {
 
       {/* Scrollable Content Section */}
       <div className="flex-1 overflow-auto no-scrollbar mt-8">
-        <div className="space-y-10 pb-6">
+        <div className="space-y-6 pb-6">
           {filteredPosts?.map((post) => (
             <BlogPost key={post.id} post={post} />
           ))}
