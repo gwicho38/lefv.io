@@ -136,6 +136,7 @@ export function registerRoutes(app: Express): Server {
         })
       );
 
+      posts.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
       res.status(200).json(posts);
     } catch (error) {
       logError("Error loading blog posts", error);
