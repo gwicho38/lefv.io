@@ -25,11 +25,11 @@ WORKDIR /app
 
 # Install production dependencies only
 COPY package*.json ./
-RUN npm ci --production --legacy-peer-deps && npm cache clean --force
+RUN npm ci --legacy-peer-deps && npm cache clean --force
 
 # Copy built application from builder stage
 COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/client/src/content ./client/src/content
+COPY --from=builder /app/content ./content
 
 # Create logs directory
 RUN mkdir -p logs
