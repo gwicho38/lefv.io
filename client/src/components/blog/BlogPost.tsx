@@ -1,12 +1,11 @@
 import { format } from "date-fns";
 import { useState } from "react";
-import ReactMarkdown from "react-markdown"; // ✅ Import react-markdown
+import ReactMarkdown from "react-markdown";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
   AlertDialog,
   AlertDialogContent,
-  AlertDialogDescription,
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
@@ -31,18 +30,18 @@ export function BlogPost({ post }: BlogPostProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   const PostContent = ({ isModal = false }: { isModal?: boolean }) => (
-    <Card className={`hover:shadow-lg transition-shadow flex flex-col ${!isModal && 'cursor-pointer'} w-full max-w-full`}>
+    <Card className={`hover:shadow-lg transition-shadow flex flex-col ${!isModal && 'cursor-pointer'}`}>
       <CardHeader>
         <div className="space-y-2">
           <CardTitle className="text-2xl">{post.title}</CardTitle>
-          <div className="flex items-center justify-between flex-wrap gap-2">
+          <div className="flex items-center justify-between">
             <div className="text-sm text-muted-foreground">
               {format(new Date(post.createdAt), "MMMM d, yyyy")}
             </div>
             {post.tags && post.tags.length > 0 && (
               <div className="flex gap-2 flex-wrap">
                 {post.tags.map((tag) => (
-                  <Badge key={tag.id} variant="secondary" className="whitespace-nowrap">
+                  <Badge key={tag.id} variant="secondary">
                     {tag.name}
                   </Badge>
                 ))}
@@ -52,15 +51,14 @@ export function BlogPost({ post }: BlogPostProps) {
         </div>
       </CardHeader>
       <CardContent
-        className={`flex-1 ${isModal ? 'overflow-auto no-scrollbar max-h-[70vh]' : 'overflow-hidden max-h-96'} w-full`}
+        className={`flex-1 ${isModal ? 'overflow-auto no-scrollbar max-h-[70vh]' : 'overflow-hidden max-h-96'}`}
       >
-        <div className="prose prose-sm dark:prose-invert max-w-none w-full overflow-x-auto">
+        <div className="prose prose-sm dark:prose-invert max-w-none">
           <ReactMarkdown>{post.content}</ReactMarkdown>
         </div>
       </CardContent>
     </Card>
   );
-
 
   return (
     <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
@@ -69,16 +67,14 @@ export function BlogPost({ post }: BlogPostProps) {
           <PostContent />
         </div>
       </AlertDialogTrigger>
-      <AlertDialogContent className="max-w-4xl w-full max-w-[95vw] h-[90vh] flex flex-col justify-start items-center">
-        <AlertDialogHeader className="w-full">
-          <AlertDialogTitle className="text-xl font-bold">{post.title}</AlertDialogTitle>
-          <AlertDialogDescription>
-            Full blog post content with tags and publication date.
-          </AlertDialogDescription>
+      <AlertDialogContent className="max-w-4xl h-[90vh] overflow-hidden">
+        <AlertDialogHeader>
+          <AlertDialogTitle className="sr-only">
+            {post.title}
+          </AlertDialogTitle>
         </AlertDialogHeader>
         <PostContent isModal={true} />
       </AlertDialogContent>
-
     </AlertDialog>
   );
 }
