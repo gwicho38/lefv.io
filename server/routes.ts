@@ -116,29 +116,53 @@ export function registerRoutes(app: Express): Server {
   app.get("/api/posts", asyncHandler(async (req, res) => {
     const BLOG_DIR = path.join(process.cwd(), "content/blog");
     try {
-      const filenames = await fs.promises.readdir(BLOG_DIR);
+      const filenames = (await fs.promises.readdir(BLOG_DIR)).filter(f => f.endsWith(".md"));
       const posts = await Promise.all(
         filenames.map(async (filename, index) => {
           const filePath = path.join(BLOG_DIR, filename);
           const content = await fs.promises.readFile(filePath, "utf-8");
           const parsed = matter(content);
-  
+
           return {
             id: index + 1,
+            slug: filename.replace(".md", ""),
             title: parsed.data.title || filename.replace(".md", "").replace(/-/g, " "),
             content: parsed.content.trim(),
             createdAt: parsed.data.date || new Date().toISOString(),
             tags: Array.isArray(parsed.data.tags)
-              ? parsed.data.tags.map((tag, i) => ({ id: i + 1, name: tag })) // Ensure `{ id, name }`
+              ? parsed.data.tags.map((tag, i) => ({ id: i + 1, name: tag }))
               : [],
           };
         })
       );
-  
+
       res.status(200).json(posts);
     } catch (error) {
       logError("Error loading blog posts", error);
       return errorResponse(res, 500, "Failed to load posts");
+    }
+  }));
+
+  app.get("/api/posts/:slug", asyncHandler(async (req, res) => {
+    const BLOG_DIR = path.join(process.cwd(), "content/blog");
+    const slug = req.params.slug;
+    const filePath = path.join(BLOG_DIR, `${slug}.md`);
+
+    try {
+      const content = await fs.promises.readFile(filePath, "utf-8");
+      const parsed = matter(content);
+
+      res.status(200).json({
+        slug,
+        title: parsed.data.title || slug.replace(/-/g, " "),
+        content: parsed.content.trim(),
+        createdAt: parsed.data.date || new Date().toISOString(),
+        tags: Array.isArray(parsed.data.tags)
+          ? parsed.data.tags.map((tag: string, i: number) => ({ id: i + 1, name: tag }))
+          : [],
+      });
+    } catch (error) {
+      return errorResponse(res, 404, "Post not found");
     }
   }));  
 
