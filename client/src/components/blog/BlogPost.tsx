@@ -30,7 +30,7 @@ export function BlogPost({ post }: BlogPostProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   const PostContent = ({ isModal = false }: { isModal?: boolean }) => (
-    <Card className={`hover:shadow-lg transition-shadow flex flex-col ${!isModal && 'cursor-pointer'}`}>
+    <Card className={`hover:shadow-lg transition-shadow flex flex-col ${!isModal ? 'cursor-pointer max-h-[28rem] overflow-hidden' : ''}`}>
       <CardHeader>
         <div className="space-y-2">
           <CardTitle className="text-2xl">{post.title}</CardTitle>

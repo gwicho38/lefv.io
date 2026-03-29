@@ -116,7 +116,7 @@ export function registerRoutes(app: Express): Server {
   app.get("/api/posts", asyncHandler(async (req, res) => {
     const BLOG_DIR = path.join(process.cwd(), "content/blog");
     try {
-      const filenames = await fs.promises.readdir(BLOG_DIR);
+      const filenames = (await fs.promises.readdir(BLOG_DIR)).filter(f => f.endsWith(".md"));
       const posts = await Promise.all(
         filenames.map(async (filename, index) => {
           const filePath = path.join(BLOG_DIR, filename);
