@@ -1,3 +1,9 @@
+---
+title: "Development Implications of Repeated Games"
+date: 2025-04-23
+tags: ["law", "development", "game-theory"]
+---
+
 **The Development Implications of the Prisoner's Dilemma**
 
 Law and Development
@@ -588,7 +594,7 @@ rise of guilds is likely to have increased N because they made each
 individual member of the guild accountable to the other members of the
 guild. Third, the divisions between urban and rural class could have
 decreased N for individuals in aggregate, decreasing urban dwellers
-interconnectedness with rural dwellers, and vise versa.
+interconnectedness with rural dwellers, and vice versa.
 
 The social structure of Agrarian societies increased ∂ overall because
 stratification decreased the credibility of punishment regimes as well

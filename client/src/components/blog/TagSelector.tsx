@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import {
     AlertDialog,
     AlertDialogContent,
+    AlertDialogDescription,
     AlertDialogHeader,
     AlertDialogTitle,
     AlertDialogTrigger,
@@ -53,6 +54,9 @@ export function TagSelector({ selectedTags, onTagClick }: TagSelectorProps) {
             <AlertDialogContent className="sm:max-w-2xl">
                 <AlertDialogHeader>
                     <AlertDialogTitle>Select Tags</AlertDialogTitle>
+                    <AlertDialogDescription>
+                        Choose tags to filter blog posts. Selected tags will be highlighted.
+                    </AlertDialogDescription>
                 </AlertDialogHeader>
 
                 <div className="flex-1 overflow-auto no-scrollbar max-h-[60vh]">

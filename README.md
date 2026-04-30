@@ -9,7 +9,7 @@
 This project uses GitHub Actions for CI/CD:
 
 - **Continuous Integration**: All pushes and pull requests to the `main` branch trigger linting and tests.
-- **Continuous Deployment**: Successful changes to the `main` branch are automatically deployed to the production server.
+- **Continuous Deployment**: Successful changes to the `release` branch are automatically deployed to the production server.
 
 ### GitHub Actions Workflow
 
@@ -40,8 +40,8 @@ This project supports both local PostgreSQL and Supabase as database providers.
 USE_SUPABASE=true
 
 # Supabase credentials
-NEXT_PUBLIC_SUPABASE_URL=https://your-project-id.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+VITE_SUPABASE_URL=https://your-project-id.supabase.co
+VITE_SUPABASE_ANON_KEY=your-anon-key
 
 # Environment
 NODE_ENV=development

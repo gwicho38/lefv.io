@@ -1,0 +1,9 @@
+version: 2
+
+# DEPLOYMENT.md once contained a placeholder OpenSSH private key in commit
+# dea1fa1f (Aug 2025). The key has been rotated and the file redacted.
+# GitGuardian still re-flags the historical match on every PR scan; ignore
+# this single documentation file to keep CI green.
+secret:
+  ignored-paths:
+    - DEPLOYMENT.md

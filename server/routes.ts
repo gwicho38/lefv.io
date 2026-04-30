@@ -10,7 +10,13 @@ import { marked } from "marked";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
 import chokidar from "chokidar";
-import { log } from "console";
+import { logError, logInfo, logWarn, logDebug } from "./utils/logger";
+import { asyncHandler, errorResponse, validateEnvVars } from "./utils/validation";
+import { checkDatabaseHealth, validateDatabaseConfig } from "./utils/database";
+import { rateLimiters } from "./utils/rateLimiter";
+import { weatherService } from "./services/weatherService";
+import { z } from "zod";
+import { loadAllPosts, loadPostBySlug, sortPosts, parseSortOrder } from "./utils/blogPosts";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -20,6 +26,12 @@ const POSTS_DIRECTORY = path.join(__dirname, "../content/blog");
 if (!fs.existsSync(POSTS_DIRECTORY)) {
   fs.mkdirSync(POSTS_DIRECTORY, { recursive: true });
 }
+
+// The /api/posts route reads markdown directly from disk, so the DB mirror is
+// only useful when something downstream (e.g. analytics) queries the posts
+// table. Default: skip the watcher — it just generates noise when the DB is
+// unreachable. Opt in by setting BLOG_DB_SYNC=1.
+const BLOG_DB_SYNC_ENABLED = process.env.BLOG_DB_SYNC === "1";
 
 // Watch for file changes in the posts directory
 const watcher = chokidar.watch(POSTS_DIRECTORY, {
@@ -69,164 +81,172 @@ async function processMarkdownFile(filePath: string) {
       }
     }
   } catch (error) {
-    console.error(`Error processing markdown file: ${filePath}`, error);
+    logError(`Error processing markdown file: ${filePath}`, error);
   }
 }
 
-// Watch for changes in markdown files
-watcher
-  .on('add', processMarkdownFile)
-  .on('change', processMarkdownFile)
-  .on('unlink', async (filePath) => {
-    const fileName = path.basename(filePath, '.md');
-    await db.delete(posts).where(eq(posts.title, fileName));
-  });
+// Watch for changes in markdown files (DB mirror; opt-in via BLOG_DB_SYNC=1)
+if (BLOG_DB_SYNC_ENABLED) {
+  watcher
+    .on('add', processMarkdownFile)
+    .on('change', processMarkdownFile)
+    .on('unlink', async (filePath) => {
+      try {
+        const fileName = path.basename(filePath, '.md');
+        await db.delete(posts).where(eq(posts.title, fileName));
+      } catch (error) {
+        logError(`Error removing post for unlinked file: ${filePath}`, error);
+      }
+    });
+} else {
+  logInfo("Blog DB sync disabled (set BLOG_DB_SYNC=1 to enable)");
+}
 
 export function registerRoutes(app: Express): Server {
-  // // Blog routes
-  // app.get("/api/posts", async (req, res) => {
-  //   console.log(process.env.DATABASE_URL)
-  //   try {
-  //     const allPosts = await db.query.posts.findMany({
-  //       orderBy: [desc(posts.createdAt)],
-  //       with: {
-  //         postTags: {
-  //           with: {
-  //             tag: true
-  //           }
-  //         }
-  //       }
-  //     });
+  // Health check endpoint
+  app.get("/api/health", asyncHandler(async (req, res) => {
+    const dbConfig = validateDatabaseConfig();
+    const dbHealth = dbConfig.isValid ? await checkDatabaseHealth() : false;
+    
+    const health = {
+      status: dbHealth ? "healthy" : "unhealthy",
+      timestamp: new Date().toISOString(),
+      database: {
+        connected: dbHealth,
+        configValid: dbConfig.isValid,
+        errors: dbConfig.errors
+      },
+      environment: process.env.NODE_ENV || 'development'
+    };
+    
+    const statusCode = dbHealth ? 200 : 503;
+    res.status(statusCode).json(health);
+  }));
 
-  //     // Transform the data to match the expected format
-  //     const transformedPosts = allPosts.map(post => ({
-  //       ...post,
-  //       tags: post.postTags.map(pt => pt.tag)
-  //     }));
 
-  //     res.json(transformedPosts);
-  //   } catch (error) {
-  //     log(error);
-  //     res.status(500).json({ error: "Failed to fetch posts" });
-  //   }
-  // });
+  // Apply rate limiting to all API routes
+  app.use("/api", rateLimiters.api);
 
   // Blog routes
-  app.get("/api/posts", async (req, res) => {
-    const BLOG_DIR = path.join(process.cwd(), "content/blog");
+  app.get("/api/posts", asyncHandler(async (req, res) => {
     try {
-      const filenames = await fs.promises.readdir(BLOG_DIR);
-      const posts = await Promise.all(
-        filenames.map(async (filename, index) => {
-          const filePath = path.join(BLOG_DIR, filename);
-          const content = await fs.promises.readFile(filePath, "utf-8");
-          const parsed = matter(content);
-  
-          return {
-            id: index + 1,
-            title: parsed.data.title || filename.replace(".md", "").replace(/-/g, " "),
-            content: parsed.content.trim(),
-            createdAt: parsed.data.date || new Date().toISOString(),
-            tags: Array.isArray(parsed.data.tags)
-              ? parsed.data.tags.map((tag, i) => ({ id: i + 1, name: tag })) // Ensure `{ id, name }`
-              : [],
-          };
-        })
-      );
-  
+      const order = parseSortOrder(req.query.sort);
+      const posts = sortPosts(await loadAllPosts(), order);
       res.status(200).json(posts);
     } catch (error) {
-      res.status(500).json({ error: "Failed to load posts" });
+      logError("Error loading blog posts", error);
+      return errorResponse(res, 500, "Failed to load posts");
     }
-  });  
+  }));
 
-  app.get("/api/tags", async (req, res) => {
-    const BLOG_DIR = path.join(process.cwd(), "content/blog");
+  app.get("/api/posts/:slug", asyncHandler(async (req, res) => {
     try {
-      const filenames = await fs.promises.readdir(BLOG_DIR);
-  
+      const post = await loadPostBySlug(req.params.slug);
+      if (!post || post.draft) {
+        return errorResponse(res, 404, "Post not found");
+      }
+      res.status(200).json(post);
+    } catch (error) {
+      logError("Error loading blog post", error);
+      return errorResponse(res, 500, "Failed to load post");
+    }
+  }));
+
+  app.get("/feed.xml", asyncHandler(async (_req, res) => {
+    try {
+      const posts = sortPosts(await loadAllPosts(), "newest").slice(0, 50);
+      const site = process.env.SITE_URL || "https://lefv.info";
+      const escape = (s: string) =>
+        s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+         .replace(/"/g, "&quot;").replace(/'/g, "&apos;");
+      const items = posts.map(p => `
+    <item>
+      <title>${escape(p.title)}</title>
+      <link>${site}/blog/${p.slug}</link>
+      <guid isPermaLink="true">${site}/blog/${p.slug}</guid>
+      <pubDate>${new Date(p.createdAt).toUTCString()}</pubDate>
+      <description>${escape(p.excerpt)}</description>
+      ${p.tags.map(t => `<category>${escape(t.name)}</category>`).join("")}
+    </item>`).join("");
+      const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>lefv.info</title>
+    <link>${site}</link>
+    <description>Blog posts from lefv.info</description>
+    <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>${items}
+  </channel>
+</rss>`;
+      res.set("Content-Type", "application/rss+xml; charset=utf-8");
+      res.status(200).send(xml);
+    } catch (error) {
+      logError("Error generating RSS feed", error);
+      return errorResponse(res, 500, "Failed to generate feed");
+    }
+  }));
+
+
+  app.get("/api/tags", asyncHandler(async (_req, res) => {
+    try {
+      const posts = await loadAllPosts();
       const allTags = new Set<string>();
-  
-      await Promise.all(
-        filenames.map(async (filename) => {
-          const filePath = path.join(BLOG_DIR, filename);
-          const fileContent = await fs.promises.readFile(filePath, "utf-8");
-          const { data } = matter(fileContent);
-          if (data.tags && Array.isArray(data.tags)) {
-            data.tags.forEach((tag: string) => allTags.add(tag));
-          }
-        })
-      );
-  
-      // ✅ Ensure tags have unique IDs
+      for (const post of posts) {
+        for (const tag of post.tags) {
+          allTags.add(tag.name);
+        }
+      }
       const tagsArray = Array.from(allTags).map((tag, index) => ({
         id: index + 1,
         name: tag,
       }));
-  
       res.json(tagsArray);
     } catch (error) {
-      console.error("Error fetching tags:", error);
-      res.status(500).json({ error: "Failed to fetch tags" });
+      logError("Error fetching tags", error);
+      return errorResponse(res, 500, "Failed to fetch tags");
     }
-  });  
+  }));
 
-  // Enhanced weather route with more data points
-  app.get("/api/weather", async (req, res) => {
+
+  // Enhanced weather route with fallback to OpenWeatherMap
+  app.get("/api/weather", rateLimiters.strict, asyncHandler(async (req, res) => {
     try {
-      if (!process.env.AMBIENT_API_KEY || !process.env.AMBIENT_APP_KEY) {
-        return res.status(500).json({ error: "Weather API keys not configured" });
-      }
-
-      const response = await fetch(
-        `https://api.ambientweather.net/v1/devices?apiKey=${process.env.AMBIENT_API_KEY}&applicationKey=${process.env.AMBIENT_APP_KEY}`
-      );
-
-      if (!response.ok) {
-        throw new Error('Weather API request failed');
-      }
-
-      const data = await response.json();
-      const lastData = data[0]?.lastData;
-
-      if (!lastData) {
-        return res.status(404).json({ error: "No weather data available" });
-      }
-
-      res.json({
-        temperature: lastData.tempf || 0,
-        humidity: lastData.humidity || 0,
-        windSpeed: lastData.windspeedmph || 0,
-        pressure: lastData.baromrelin || 0,
-        windDir: lastData.winddir || 0,
-        hourlyrainin: lastData.hourlyrainin || 0,
-        dailyrainin: lastData.dailyrainin || 0,
-        weeklyrainin: lastData.weeklyrainin || 0,
-        monthlyrainin: lastData.monthlyrainin || 0,
-        feelsLike: lastData.feelsLike || lastData.tempf || 0,
-        dewPoint: lastData.dewPoint || 0,
-        lastRain: lastData.lastRain || null
-      });
+      const weatherData = await weatherService.getCurrentWeather();
+      res.json(weatherData);
     } catch (error) {
-      res.status(500).json({ error: "Failed to fetch weather data" });
+      logError("Weather API error", error);
+      return errorResponse(res, 500, "Failed to fetch weather data");
     }
-  });
+  }));
 
-  app.get("/api/weather/history/:type", async (req, res) => {
+  app.get("/api/weather/history/:type", rateLimiters.strict, asyncHandler(async (req, res) => {
+    const { type } = req.params;
+
+    // Validate request shape before checking server-side configuration so
+    // bad input always surfaces as 400, regardless of env state.
+    if (!['temperature', 'precipitation'].includes(type)) {
+      return errorResponse(res, 400, "Invalid type parameter. Must be 'temperature' or 'precipitation'");
+    }
+
     try {
-      if (!process.env.AMBIENT_API_KEY || !process.env.AMBIENT_APP_KEY || !process.env.AMBIENT_MAC_ADDRESS) {
-        return res.status(500).json({ error: "Weather API keys or MAC address not configured" });
-      }
+      validateEnvVars(['AMBIENT_API_KEY', 'AMBIENT_APP_KEY', 'AMBIENT_MAC_ADDRESS']);
+    } catch (error) {
+      return errorResponse(res, 500, "Weather API keys or MAC address not configured");
+    }
 
+    try {
       const endDate = new Date();
       const startDate = new Date(endDate.getTime() - 24 * 60 * 60 * 1000);
 
+      // Note: Ambient Weather API requires API keys in query params
+      const params = new URLSearchParams({
+        apiKey: process.env.AMBIENT_API_KEY!,
+        applicationKey: process.env.AMBIENT_APP_KEY!,
+        endDate: endDate.toISOString(),
+        startDate: startDate.toISOString()
+      });
+      
       const response = await fetch(
-        `https://api.ambientweather.net/v1/devices/${process.env.AMBIENT_MAC_ADDRESS}/data?` +
-        `apiKey=${process.env.AMBIENT_API_KEY}&` +
-        `applicationKey=${process.env.AMBIENT_APP_KEY}&` +
-        `endDate=${endDate.toISOString()}&` +
-        `startDate=${startDate.toISOString()}`
+        `https://api.ambientweather.net/v1/devices/${process.env.AMBIENT_MAC_ADDRESS}/data?${params.toString()}`
       );
 
       if (!response.ok) {
@@ -234,17 +254,26 @@ export function registerRoutes(app: Express): Server {
       }
 
       const data = await response.json();
-      const transformedData = data.map((point: any) => ({
-        timestamp: new Date(point.dateutc).getTime(),
-        [req.params.type === 'temperature' ? 'temperature' : 'precipitation']:
-          req.params.type === 'temperature' ? point.tempf : point.hourlyrainin
-      }));
-
-      res.json(transformedData);
+      
+      if (type === 'temperature') {
+        const formattedData = data.map((item: any) => ({
+          time: item.date || item.dateutc,
+          value: item.tempf || 0
+        }));
+        res.json(formattedData);
+      } else {
+        const formattedData = data.map((item: any) => ({
+          time: item.date || item.dateutc,
+          hourly: item.hourlyrainin || 0,
+          daily: item.dailyrainin || 0
+        }));
+        res.json(formattedData);
+      }
     } catch (error) {
-      res.status(500).json({ error: "Failed to fetch historical weather data" });
+      logError("Weather history API error", error);
+      return errorResponse(res, 500, "Failed to fetch historical weather data");
     }
-  });
+  }));
 
   const httpServer = createServer(app);
   return httpServer;

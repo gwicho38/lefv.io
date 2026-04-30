@@ -3,6 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import {
   AlertDialog,
   AlertDialogContent,
+  AlertDialogDescription,
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
@@ -105,6 +106,9 @@ export function WeatherCard({ metric }: WeatherCardProps) {
           <AlertDialogTitle className="text-2xl">
             {metric.label} Details
           </AlertDialogTitle>
+          <AlertDialogDescription>
+            Detailed information and historical data for {metric.label.toLowerCase()}.
+          </AlertDialogDescription>
         </AlertDialogHeader>
         <div className="flex-1 overflow-hidden">
           <WeatherCardDisplay isModal={true} />
