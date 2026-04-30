@@ -1,0 +1,14 @@
+title = "Gitleaks config"
+
+# Use Gitleaks' built-in default rules.
+[extend]
+useDefault = true
+
+# Allowlist a historical leak that has been rotated and superseded.
+# DEPLOYMENT.md committed a placeholder OpenSSH private key in commit
+# dea1fa1f57c8ce2ce6a9b037e6edd626ff8bd0df (Aug 2025). The key has been
+# rotated; the documentation has been redacted. Keep the allowlist scoped
+# to that commit so future leaks still trip the scan.
+[[rules.allowlist]]
+  description = "Historical placeholder key in DEPLOYMENT.md (rotated)"
+  commits = ["dea1fa1f57c8ce2ce6a9b037e6edd626ff8bd0df"]
