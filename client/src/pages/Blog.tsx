@@ -152,7 +152,7 @@ export default function Blog() {
               : "No posts found for the selected tags."}
           </div>
         ) : grouped ? (
-          <div className="space-y-8 pb-6">
+          <div className="space-y-8 pb-24">
             {grouped.map(({ year, posts }) => (
               <section key={year} className="space-y-4">
                 <h2 className="text-xl font-semibold text-muted-foreground border-b pb-1">
@@ -167,7 +167,7 @@ export default function Blog() {
             ))}
           </div>
         ) : (
-          <div className="space-y-4 pb-6">
+          <div className="space-y-4 pb-24">
             {filteredPosts.map((post) => (
               <BlogPost key={post.slug} post={post} />
             ))}
