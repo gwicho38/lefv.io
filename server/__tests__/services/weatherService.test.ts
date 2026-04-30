@@ -1,8 +1,22 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeAll, afterAll, beforeEach, afterEach } from 'vitest';
 import { weatherService } from '../../services/weatherService';
+import { server as mswServer } from '../../../client/src/__tests__/mocks/server';
+
+// This file mocks fetch directly via vi.fn(); the global MSW interceptor (set
+// up in client/src/__tests__/setup.ts) tries to clone the response shape
+// produced by those mocks, which is not a real Response and lacks .clone().
+// Stop the MSW server for the duration of this file and restart it after, so
+// the global setup's afterAll close() still works.
+beforeAll(() => {
+  mswServer.close();
+});
+afterAll(() => {
+  mswServer.listen({ onUnhandledRequest: 'bypass' });
+});
 
 // Mock fetch globally
-global.fetch = vi.fn();
+const mockFetch = vi.fn();
+global.fetch = mockFetch as any;
 
 describe('WeatherService', () => {
   beforeEach(() => {
@@ -42,7 +56,7 @@ describe('WeatherService', () => {
         }
       }];
 
-      (fetch as any).mockResolvedValueOnce({
+      mockFetch.mockResolvedValueOnce({
         ok: true,
         json: () => Promise.resolve(mockAmbientData)
       });
@@ -66,7 +80,7 @@ describe('WeatherService', () => {
       process.env.OPENWEATHER_COUNTRY = 'FR';
 
       // Mock Ambient Weather API failure
-      (fetch as any)
+      mockFetch
         .mockResolvedValueOnce({
           ok: false,
           status: 500
@@ -112,7 +126,7 @@ describe('WeatherService', () => {
       process.env.OPENWEATHER_COUNTRY = 'GB';
 
       // Mock OpenWeatherMap API response
-      (fetch as any).mockResolvedValueOnce({
+      mockFetch.mockResolvedValueOnce({
         ok: true,
         json: () => Promise.resolve({
           main: {
@@ -156,7 +170,7 @@ describe('WeatherService', () => {
       process.env.OPENWEATHER_API_KEY = 'test-openweather-key';
 
       // Mock both services failing
-      (fetch as any)
+      mockFetch
         .mockResolvedValueOnce({
           ok: false,
           status: 500
@@ -184,7 +198,7 @@ describe('WeatherService', () => {
         { date: '2024-01-01T12:00:00Z', tempf: 74.0 }
       ];
 
-      (fetch as any).mockResolvedValueOnce({
+      mockFetch.mockResolvedValueOnce({
         ok: true,
         json: () => Promise.resolve(mockHistoryData)
       });
@@ -214,7 +228,7 @@ describe('WeatherService', () => {
         { date: '2024-01-01T11:00:00Z', hourlyrainin: 0.0, dailyrainin: 0.3 }
       ];
 
-      (fetch as any).mockResolvedValueOnce({
+      mockFetch.mockResolvedValueOnce({
         ok: true,
         json: () => Promise.resolve(mockHistoryData)
       });

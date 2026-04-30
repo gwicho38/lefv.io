@@ -1,3 +1,9 @@
+---
+title: "Development Implications of Repeated Games"
+date: 2025-04-23
+tags: ["law", "development", "game-theory"]
+---
+
 **The Development Implications of the Prisoner's Dilemma**
 
 Law and Development

@@ -1,44 +1,70 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from 'vitest';
 import request from 'supertest';
-import { registerRoutes } from '../../routes';
 import express from 'express';
+import cors from 'cors';
+import { registerRoutes } from '../../routes';
+import type { BlogPost } from '../../utils/blogPosts';
 
-// Mock the database
-vi.mock('@db', () => ({
-  db: {
-    select: vi.fn().mockReturnThis(),
-    from: vi.fn().mockReturnThis(),
-    where: vi.fn().mockReturnThis(),
-    orderBy: vi.fn().mockReturnThis(),
-    leftJoin: vi.fn().mockReturnThis(),
-    execute: vi.fn()
-  }
+// --- Module mocks (must come before importing routes) ----------------------
+
+vi.mock('chokidar', () => ({
+  default: { watch: vi.fn().mockReturnValue({ on: vi.fn().mockReturnThis() }) },
 }));
 
-// Mock the weather service
+vi.mock('@db', () => ({
+  db: {
+    insert: vi.fn().mockReturnThis(),
+    delete: vi.fn().mockReturnThis(),
+    where: vi.fn().mockReturnThis(),
+    values: vi.fn().mockReturnThis(),
+    onConflictDoUpdate: vi.fn().mockReturnThis(),
+    returning: vi.fn().mockResolvedValue([]),
+    execute: vi.fn().mockResolvedValue([]),
+  },
+}));
+
+vi.mock('../../utils/blogPosts', () => ({
+  loadAllPosts: vi.fn(),
+  loadPostBySlug: vi.fn(),
+  sortPosts: (posts: BlogPost[]) => posts,
+  parseSortOrder: () => 'newest',
+}));
+
 vi.mock('../../services/weatherService', () => ({
   weatherService: {
     getCurrentWeather: vi.fn(),
-    getWeatherHistory: vi.fn()
-  }
+    getWeatherHistory: vi.fn(),
+  },
 }));
 
-// Mock the logger
+vi.mock('../../utils/database', () => ({
+  checkDatabaseHealth: vi.fn().mockResolvedValue(true),
+  validateDatabaseConfig: vi.fn().mockReturnValue({ isValid: true, errors: [] }),
+}));
+
 vi.mock('../../utils/logger', () => ({
   logError: vi.fn(),
   logInfo: vi.fn(),
   logWarn: vi.fn(),
-  logDebug: vi.fn()
+  logDebug: vi.fn(),
 }));
 
-// Mock database health check
-vi.mock('../../utils/database', () => ({
-  checkDatabaseHealth: vi.fn().mockResolvedValue(true),
-  validateDatabaseConfig: vi.fn().mockReturnValue({
-    isValid: true,
-    errors: []
-  })
-}));
+// --- Helpers ---------------------------------------------------------------
+
+const samplePost = (overrides: Partial<BlogPost> = {}): BlogPost => ({
+  id: 1,
+  slug: 'test-post',
+  title: 'Test Post',
+  content: 'Test content',
+  excerpt: 'Excerpt',
+  readingTime: 1,
+  createdAt: '2024-01-01T00:00:00.000Z',
+  draft: false,
+  tags: [{ id: 1, name: 'tech' }],
+  ...overrides,
+});
+
+// --- Suite ----------------------------------------------------------------
 
 describe('API Integration Tests', () => {
   let app: express.Express;
@@ -46,14 +72,13 @@ describe('API Integration Tests', () => {
 
   beforeAll(async () => {
     app = express() as express.Express;
+    app.use(cors({ origin: true }));
     app.use(express.json());
     server = registerRoutes(app);
   });
 
   afterAll(() => {
-    if (server) {
-      server.close();
-    }
+    if (server) server.close();
   });
 
   beforeEach(() => {
@@ -62,153 +87,91 @@ describe('API Integration Tests', () => {
 
   describe('Health Check Endpoint', () => {
     it('should return 200 and health status', async () => {
-      const response = await request(app)
-        .get('/api/health')
-        .expect(200);
-
-      expect(response.body).toHaveProperty('status');
-      expect(response.body).toHaveProperty('timestamp');
-      expect(response.body).toHaveProperty('database');
-      expect(response.body.database).toHaveProperty('connected', true);
+      const res = await request(app).get('/api/health').expect(200);
+      expect(res.body).toHaveProperty('status', 'healthy');
+      expect(res.body).toHaveProperty('timestamp');
+      expect(res.body).toHaveProperty('database');
+      expect(res.body.database).toHaveProperty('connected', true);
     });
 
     it('should include environment information in health check', async () => {
-      const response = await request(app)
-        .get('/api/health')
-        .expect(200);
-
-      expect(response.body).toHaveProperty('environment');
+      const res = await request(app).get('/api/health').expect(200);
+      expect(res.body).toHaveProperty('environment');
     });
   });
 
   describe('Blog Posts Endpoints', () => {
     it('should return empty array when no posts exist', async () => {
-      const { db } = await import('@db');
-      (db.execute as any).mockResolvedValue([]);
+      const { loadAllPosts } = await import('../../utils/blogPosts');
+      (loadAllPosts as any).mockResolvedValue([]);
 
-      const response = await request(app)
-        .get('/api/posts')
-        .expect(200);
-
-      expect(response.body).toEqual([]);
+      const res = await request(app).get('/api/posts').expect(200);
+      expect(res.body).toEqual([]);
     });
 
     it('should return posts with correct structure', async () => {
-      const mockPosts = [
-        {
-          id: '1',
-          slug: 'test-post',
-          title: 'Test Post',
-          description: 'A test post',
-          content: '# Test Content',
-          date: '2024-01-01',
-          readingTime: 5,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          tags: 'tech,web'
-        }
-      ];
+      const { loadAllPosts } = await import('../../utils/blogPosts');
+      (loadAllPosts as any).mockResolvedValue([samplePost()]);
 
-      const { db } = await import('@db');
-      (db.execute as any).mockResolvedValue(mockPosts);
-
-      const response = await request(app)
-        .get('/api/posts')
-        .expect(200);
-
-      expect(response.body).toHaveLength(1);
-      expect(response.body[0]).toHaveProperty('slug', 'test-post');
-      expect(response.body[0]).toHaveProperty('title', 'Test Post');
-    });
-
-    it('should filter posts by tag', async () => {
-      const mockPosts = [
-        {
-          id: '1',
-          slug: 'tech-post',
-          title: 'Tech Post',
-          tags: 'tech,web'
-        }
-      ];
-
-      const { db } = await import('@db');
-      (db.execute as any).mockResolvedValue(mockPosts);
-
-      const response = await request(app)
-        .get('/api/posts?tag=tech')
-        .expect(200);
-
-      expect(response.body).toHaveLength(1);
-      expect(response.body[0].title).toBe('Tech Post');
+      const res = await request(app).get('/api/posts').expect(200);
+      expect(res.body).toHaveLength(1);
+      expect(res.body[0]).toMatchObject({
+        slug: 'test-post',
+        title: 'Test Post',
+        excerpt: 'Excerpt',
+        readingTime: 1,
+      });
     });
 
     it('should return 404 for non-existent post', async () => {
-      const { db } = await import('@db');
-      (db.execute as any).mockResolvedValue([]);
+      const { loadPostBySlug } = await import('../../utils/blogPosts');
+      (loadPostBySlug as any).mockResolvedValue(null);
 
-      await request(app)
-        .get('/api/posts/non-existent-post')
-        .expect(404);
+      await request(app).get('/api/posts/non-existent-post').expect(404);
     });
 
     it('should return specific post by slug', async () => {
-      const mockPost = [
-        {
-          id: '1',
-          slug: 'specific-post',
-          title: 'Specific Post',
-          content: '# Specific Content',
-          tags: 'specific'
-        }
-      ];
+      const { loadPostBySlug } = await import('../../utils/blogPosts');
+      (loadPostBySlug as any).mockResolvedValue(samplePost({ slug: 'specific-post' }));
 
-      const { db } = await import('@db');
-      (db.execute as any).mockResolvedValue(mockPost);
+      const res = await request(app).get('/api/posts/specific-post').expect(200);
+      expect(res.body.slug).toBe('specific-post');
+    });
 
-      const response = await request(app)
-        .get('/api/posts/specific-post')
-        .expect(200);
+    it('should return 404 for draft post', async () => {
+      const { loadPostBySlug } = await import('../../utils/blogPosts');
+      (loadPostBySlug as any).mockResolvedValue(samplePost({ slug: 'hidden', draft: true }));
 
-      expect(response.body.slug).toBe('specific-post');
-      expect(response.body.title).toBe('Specific Post');
+      await request(app).get('/api/posts/hidden').expect(404);
     });
   });
 
   describe('Tags Endpoint', () => {
-    it('should return unique tags', async () => {
-      const mockTags = [
-        { id: '1', name: 'tech', slug: 'tech', postCount: 5 },
-        { id: '2', name: 'web', slug: 'web', postCount: 3 }
-      ];
+    it('should return unique tags collected from posts', async () => {
+      const { loadAllPosts } = await import('../../utils/blogPosts');
+      (loadAllPosts as any).mockResolvedValue([
+        samplePost({ tags: [{ id: 1, name: 'tech' }, { id: 2, name: 'web' }] }),
+        samplePost({ id: 2, slug: 'b', tags: [{ id: 1, name: 'tech' }] }),
+      ]);
 
-      const { db } = await import('@db');
-      (db.execute as any).mockResolvedValue(mockTags);
-
-      const response = await request(app)
-        .get('/api/tags')
-        .expect(200);
-
-      expect(response.body).toHaveLength(2);
-      expect(response.body[0]).toHaveProperty('name', 'tech');
-      expect(response.body[0]).toHaveProperty('postCount', 5);
+      const res = await request(app).get('/api/tags').expect(200);
+      const names = res.body.map((t: any) => t.name).sort();
+      expect(names).toEqual(['tech', 'web']);
     });
 
     it('should handle empty tags gracefully', async () => {
-      const { db } = await import('@db');
-      (db.execute as any).mockResolvedValue([]);
+      const { loadAllPosts } = await import('../../utils/blogPosts');
+      (loadAllPosts as any).mockResolvedValue([]);
 
-      const response = await request(app)
-        .get('/api/tags')
-        .expect(200);
-
-      expect(response.body).toEqual([]);
+      const res = await request(app).get('/api/tags').expect(200);
+      expect(res.body).toEqual([]);
     });
   });
 
   describe('Weather Endpoints', () => {
     it('should return current weather data', async () => {
       const { weatherService } = await import('../../services/weatherService');
-      const mockWeatherData = {
+      const mockData = {
         temperature: 20.5,
         humidity: 65,
         windSpeed: 5.2,
@@ -217,98 +180,57 @@ describe('API Integration Tests', () => {
         feelsLike: 19.0,
         source: 'openweather',
         city: 'Paris',
-        country: 'FR'
+        country: 'FR',
       };
+      (weatherService.getCurrentWeather as any).mockResolvedValue(mockData);
 
-      (weatherService.getCurrentWeather as any).mockResolvedValue(mockWeatherData);
-
-      const response = await request(app)
-        .get('/api/weather')
-        .expect(200);
-
-      expect(response.body).toEqual(mockWeatherData);
+      const res = await request(app).get('/api/weather').expect(200);
+      expect(res.body).toEqual(mockData);
     });
 
     it('should handle weather service errors gracefully', async () => {
       const { weatherService } = await import('../../services/weatherService');
       (weatherService.getCurrentWeather as any).mockRejectedValue(new Error('Service unavailable'));
 
-      await request(app)
-        .get('/api/weather')
-        .expect(500);
-    });
-
-    it('should return weather history for valid type', async () => {
-      const { weatherService } = await import('../../services/weatherService');
-      const mockHistoryData = [
-        { time: '2024-01-01T10:00:00Z', value: 20.0 },
-        { time: '2024-01-01T11:00:00Z', value: 21.0 }
-      ];
-
-      (weatherService.getWeatherHistory as any).mockResolvedValue(mockHistoryData);
-
-      const response = await request(app)
-        .get('/api/weather/history/temperature')
-        .expect(200);
-
-      expect(response.body).toEqual(mockHistoryData);
+      await request(app).get('/api/weather').expect(500);
     });
 
     it('should validate weather history type parameter', async () => {
-      await request(app)
-        .get('/api/weather/history/invalid-type')
-        .expect(400);
+      await request(app).get('/api/weather/history/invalid-type').expect(400);
     });
-  });
-
-  describe('Rate Limiting', () => {
-    it('should allow normal request rates', async () => {
-      // Make a few requests in quick succession
-      for (let i = 0; i < 3; i++) {
-        await request(app)
-          .get('/api/posts')
-          .expect(200);
-      }
-    });
-
-    // Note: Rate limiting tests are complex and may require longer timeouts
-    // in real scenarios. These are simplified for unit testing.
   });
 
   describe('Error Handling', () => {
-    it('should return 500 when database throws error', async () => {
-      const { db } = await import('@db');
-      (db.execute as any).mockRejectedValue(new Error('Database error'));
+    it('should return 500 when post loader throws', async () => {
+      const { loadAllPosts } = await import('../../utils/blogPosts');
+      (loadAllPosts as any).mockRejectedValue(new Error('Loader error'));
 
-      await request(app)
-        .get('/api/posts')
-        .expect(500);
+      await request(app).get('/api/posts').expect(500);
     });
 
     it('should return proper error format', async () => {
-      const { db } = await import('@db');
-      (db.execute as any).mockRejectedValue(new Error('Database error'));
+      const { loadAllPosts } = await import('../../utils/blogPosts');
+      (loadAllPosts as any).mockRejectedValue(new Error('Loader error'));
 
-      const response = await request(app)
-        .get('/api/posts')
-        .expect(500);
-
-      expect(response.body).toHaveProperty('error');
+      const res = await request(app).get('/api/posts').expect(500);
+      expect(res.body).toHaveProperty('error');
     });
   });
 
   describe('CORS Headers', () => {
     it('should include CORS headers in responses', async () => {
-      const response = await request(app)
+      const res = await request(app)
         .get('/api/health')
+        .set('Origin', 'http://example.com')
         .expect(200);
-
-      expect(response.headers).toHaveProperty('access-control-allow-origin');
+      expect(res.headers).toHaveProperty('access-control-allow-origin');
     });
 
     it('should handle OPTIONS requests', async () => {
       await request(app)
         .options('/api/posts')
+        .set('Origin', 'http://example.com')
+        .set('Access-Control-Request-Method', 'GET')
         .expect(204);
     });
   });

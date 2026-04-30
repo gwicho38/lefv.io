@@ -1,4 +1,10 @@
-RUNITED STATES DISTRICT COURT  
+---
+title: "Brief Against Compelling Buccal Swab"
+date: 2025-04-23
+tags: ["law", "criminal-procedure"]
+---
+
+UNITED STATES DISTRICT COURT  
 EASTERN DISTRICT OF NEW YORK  
 \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
 

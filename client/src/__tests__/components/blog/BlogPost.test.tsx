@@ -1,22 +1,34 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { BlogPost } from '@/components/blog/BlogPost';
 import { format } from 'date-fns';
 import { vi } from 'vitest';
 
-// Mock react-markdown because we don't need to test its implementation
 vi.mock('react-markdown', () => ({
-  default: ({ children }: { children: string }) => <div data-testid="markdown-content">{children}</div>,
+  default: ({ children }: { children: string }) => (
+    <div data-testid="markdown-content">{children}</div>
+  ),
+}));
+
+vi.mock('wouter', () => ({
+  Link: ({ href, children, className }: any) => (
+    <a href={href} className={className}>
+      {children}
+    </a>
+  ),
 }));
 
 describe('BlogPost', () => {
   const mockPost = {
     id: 1,
+    slug: 'test-post-title',
     title: 'Test Post Title',
     content: 'Test content for the blog post',
+    excerpt: 'A short excerpt of the post.',
+    readingTime: 2,
     createdAt: '2023-01-01T00:00:00.000Z',
     tags: [
       { id: 1, name: 'Tag1' },
-      { id: 2, name: 'Tag2' }
+      { id: 2, name: 'Tag2' },
     ],
   };
 
@@ -31,35 +43,43 @@ describe('BlogPost', () => {
     expect(screen.getByText(formattedDate)).toBeInTheDocument();
   });
 
+  it('renders the reading time', () => {
+    render(<BlogPost post={mockPost} />);
+    expect(screen.getByText(/2 min read/)).toBeInTheDocument();
+  });
+
   it('renders all tags', () => {
     render(<BlogPost post={mockPost} />);
     expect(screen.getByText('Tag1')).toBeInTheDocument();
     expect(screen.getByText('Tag2')).toBeInTheDocument();
   });
 
-  it('renders markdown content', () => {
+  it('renders the excerpt on the card', () => {
     render(<BlogPost post={mockPost} />);
-    const markdownElement = screen.getByTestId('markdown-content');
-    expect(markdownElement).toBeInTheDocument();
-    expect(markdownElement.textContent).toBe(mockPost.content);
+    expect(screen.getByText(mockPost.excerpt)).toBeInTheDocument();
   });
 
-  it('opens the modal when clicked', () => {
+  it('links to the individual blog post page', () => {
     render(<BlogPost post={mockPost} />);
-    
-    // Find the card and click it
-    const card = screen.getByText('Test Post Title');
-    fireEvent.click(card);
-    
-    // Check if the modal is displayed with the same content
-    const dialogTitle = screen.getAllByText('Test Post Title')[1]; // There should be two - one in card, one in dialog
-    expect(dialogTitle).toBeInTheDocument();
+    const links = screen.getAllByRole('link');
+    expect(links.length).toBeGreaterThan(0);
+    const slugLinks = links.filter(
+      (link) => link.getAttribute('href') === '/blog/test-post-title'
+    );
+    expect(slugLinks.length).toBeGreaterThanOrEqual(1);
   });
 
   it('renders a post without tags', () => {
     const postWithoutTags = { ...mockPost, tags: [] };
     render(<BlogPost post={postWithoutTags} />);
     expect(screen.getByText('Test Post Title')).toBeInTheDocument();
-    // Should not crash when tags are empty
+  });
+
+  it('falls back to content slice when no excerpt provided', () => {
+    const postNoExcerpt = { ...mockPost, excerpt: undefined };
+    render(<BlogPost post={postNoExcerpt} />);
+    expect(
+      screen.getByText(mockPost.content.slice(0, 220))
+    ).toBeInTheDocument();
   });
 });

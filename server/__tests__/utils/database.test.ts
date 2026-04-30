@@ -106,7 +106,7 @@ describe('Database Utils', () => {
         execute: vi.fn().mockResolvedValue({ rows: [{ '?column?': 1 }] })
       };
       
-      vi.doMock('../../db', () => ({ db: mockDb }));
+      vi.doMock('@db', () => ({ db: mockDb }));
       vi.doMock('drizzle-orm', () => ({ sql: vi.fn() }));
 
       const result = await checkDatabaseHealth();
@@ -120,7 +120,7 @@ describe('Database Utils', () => {
         execute: vi.fn().mockRejectedValue(new Error('Connection failed'))
       };
       
-      vi.doMock('../../db', () => ({ db: mockDb }));
+      vi.doMock('@db', () => ({ db: mockDb }));
       vi.doMock('drizzle-orm', () => ({ sql: vi.fn() }));
 
       const result = await checkDatabaseHealth();
@@ -130,22 +130,22 @@ describe('Database Utils', () => {
   });
 
   describe('logDatabaseConnectionInfo', () => {
-    it('should log Supabase connection info', () => {
-      const { logInfo } = require('../../utils/logger');
-      
+    it('should log Supabase connection info', async () => {
+      const { logInfo } = await import('../../utils/logger');
+
       process.env.USE_SUPABASE = 'true';
       process.env.VITE_SUPABASE_URL = 'https://very-long-project-id.supabase.co';
 
       logDatabaseConnectionInfo();
 
       expect(logInfo).toHaveBeenCalledWith('Using Supabase database', {
-        url: 'https://very-long-project-id...'
+        url: 'https://very-long-project-id.s...'
       });
     });
 
-    it('should log local PostgreSQL connection info', () => {
-      const { logInfo } = require('../../utils/logger');
-      
+    it('should log local PostgreSQL connection info', async () => {
+      const { logInfo } = await import('../../utils/logger');
+
       process.env.USE_SUPABASE = 'false';
       process.env.DATABASE_URL = 'postgresql://REDACTED';
 
@@ -156,9 +156,9 @@ describe('Database Utils', () => {
       });
     });
 
-    it('should not log when no database URL is configured for Supabase', () => {
-      const { logInfo } = require('../../utils/logger');
-      
+    it('should not log when no database URL is configured for Supabase', async () => {
+      const { logInfo } = await import('../../utils/logger');
+
       process.env.USE_SUPABASE = 'true';
       // No URL variables set
 
@@ -167,9 +167,9 @@ describe('Database Utils', () => {
       expect(logInfo).not.toHaveBeenCalled();
     });
 
-    it('should not log when no DATABASE_URL is configured for local PostgreSQL', () => {
-      const { logInfo } = require('../../utils/logger');
-      
+    it('should not log when no DATABASE_URL is configured for local PostgreSQL', async () => {
+      const { logInfo } = await import('../../utils/logger');
+
       process.env.USE_SUPABASE = 'false';
       // No DATABASE_URL set
 

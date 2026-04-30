@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, afterEach } from 'vitest';
 import { ErrorBoundary, useErrorHandler } from '../../components/ErrorBoundary';
 
 // Mock console.error to avoid noise in tests
@@ -78,14 +78,16 @@ describe('ErrorBoundary', () => {
 
     expect(screen.getByText('Something went wrong')).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('button', { name: /try again/i }));
-
-    // Rerender with no error
+    // Stop the child from throwing before resetting the boundary; otherwise the
+    // reset re-renders the still-throwing child and immediately re-enters the
+    // error state.
     rerender(
       <ErrorBoundary>
         <ThrowError shouldThrow={false} />
       </ErrorBoundary>
     );
+
+    fireEvent.click(screen.getByRole('button', { name: /try again/i }));
 
     expect(screen.getByText('No error')).toBeInTheDocument();
     expect(screen.queryByText('Something went wrong')).not.toBeInTheDocument();

@@ -40,8 +40,26 @@ global.IntersectionObserver = vi.fn().mockImplementation(() => ({
 }));
 
 // Setup MSW
+// Bypass requests that aren't browser-flavored (server-side tests use supertest at
+// 127.0.0.1, weather services hit external APIs already mocked via vi.fn). Keep
+// 'error' strategy for unknown public hosts so genuinely missing handlers in client
+// tests still surface.
+const MSW_BYPASS_HOSTS = new Set(['127.0.0.1', 'localhost']);
+const MSW_BYPASS_HOST_SUFFIXES = ['.ambientweather.net', '.openweathermap.org'];
+
 beforeAll(() => {
-  server.listen({ onUnhandledRequest: 'error' });
+  server.listen({
+    onUnhandledRequest: (request, print) => {
+      try {
+        const { hostname } = new URL(request.url);
+        if (MSW_BYPASS_HOSTS.has(hostname)) return;
+        if (MSW_BYPASS_HOST_SUFFIXES.some((suffix) => hostname.endsWith(suffix))) return;
+      } catch {
+        return;
+      }
+      print.error();
+    },
+  });
 });
 
 afterEach(() => {

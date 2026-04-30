@@ -33,11 +33,9 @@ export function validateDatabaseConfig(): { isValid: boolean; errors: string[] }
 
 export async function checkDatabaseHealth(): Promise<boolean> {
   try {
-    // Import db dynamically to avoid circular dependencies
-    const { db } = await import("../../db");
+    const { db } = await import("@db");
     const { sql } = await import("drizzle-orm");
-    
-    // Simple health check query
+
     await db.execute(sql`SELECT 1`);
     return true;
   } catch (error) {

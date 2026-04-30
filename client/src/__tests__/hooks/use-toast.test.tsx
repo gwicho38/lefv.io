@@ -32,38 +32,36 @@ describe('useToast', () => {
     expect(result.current.toasts[0]).toHaveProperty('id');
   });
 
-  it('should add multiple toasts', () => {
+  it('keeps only the most recent toast (TOAST_LIMIT = 1)', () => {
     const { result } = renderHook(() => useToast());
 
     act(() => {
       result.current.toast({ title: 'First toast' });
       result.current.toast({ title: 'Second toast' });
-    });
-
-    expect(result.current.toasts).toHaveLength(2);
-    expect(result.current.toasts[0].title).toBe('First toast');
-    expect(result.current.toasts[1].title).toBe('Second toast');
-  });
-
-  it('should dismiss a toast by id', () => {
-    const { result } = renderHook(() => useToast());
-
-    act(() => {
-      result.current.toast({ title: 'First toast' });
-      result.current.toast({ title: 'Second toast' });
-    });
-
-    const firstToastId = result.current.toasts[0].id;
-
-    act(() => {
-      result.current.dismiss(firstToastId);
     });
 
     expect(result.current.toasts).toHaveLength(1);
     expect(result.current.toasts[0].title).toBe('Second toast');
   });
 
-  it('should dismiss all toasts when called without id', () => {
+  it('should mark a toast as closed when dismissed by id', () => {
+    const { result } = renderHook(() => useToast());
+
+    act(() => {
+      result.current.toast({ title: 'Only toast' });
+    });
+
+    const id = result.current.toasts[0].id;
+
+    act(() => {
+      result.current.dismiss(id);
+    });
+
+    expect(result.current.toasts).toHaveLength(1);
+    expect(result.current.toasts[0].open).toBe(false);
+  });
+
+  it('marks all toasts as closed when dismiss is called without id', () => {
     const { result } = renderHook(() => useToast());
 
     act(() => {
@@ -72,35 +70,31 @@ describe('useToast', () => {
       result.current.toast({ title: 'Third toast' });
     });
 
-    expect(result.current.toasts).toHaveLength(3);
+    // TOAST_LIMIT caps at 1; only the most recent remains.
+    expect(result.current.toasts).toHaveLength(1);
 
     act(() => {
       result.current.dismiss();
     });
 
-    expect(result.current.toasts).toHaveLength(0);
+    expect(result.current.toasts.every((t) => t.open === false)).toBe(true);
   });
 
   it('should handle toast with different variants', () => {
     const { result } = renderHook(() => useToast());
 
     act(() => {
-      result.current.toast({
-        title: 'Success toast',
-        variant: 'default'
-      });
+      result.current.toast({ title: 'Success toast', variant: 'default' });
     });
+    expect(result.current.toasts[0].variant).toBe('default');
 
     act(() => {
-      result.current.toast({
-        title: 'Error toast',
-        variant: 'destructive'
-      });
+      result.current.toast({ title: 'Error toast', variant: 'destructive' });
     });
 
-    expect(result.current.toasts).toHaveLength(2);
-    expect(result.current.toasts[0].variant).toBe('default');
-    expect(result.current.toasts[1].variant).toBe('destructive');
+    // TOAST_LIMIT = 1; latest replaces previous.
+    expect(result.current.toasts).toHaveLength(1);
+    expect(result.current.toasts[0].variant).toBe('destructive');
   });
 
   it('should handle toast with action', () => {
@@ -136,13 +130,20 @@ describe('useToast', () => {
   it('should generate unique ids for each toast', () => {
     const { result } = renderHook(() => useToast());
 
+    let firstId: string | undefined;
     act(() => {
-      result.current.toast({ title: 'First toast' });
-      result.current.toast({ title: 'Second toast' });
+      const t = result.current.toast({ title: 'First toast' });
+      firstId = t.id;
     });
 
-    const ids = result.current.toasts.map(toast => toast.id);
-    expect(ids[0]).not.toBe(ids[1]);
-    expect(ids.every(id => typeof id === 'string' && id.length > 0)).toBe(true);
+    let secondId: string | undefined;
+    act(() => {
+      const t = result.current.toast({ title: 'Second toast' });
+      secondId = t.id;
+    });
+
+    expect(typeof firstId).toBe('string');
+    expect(typeof secondId).toBe('string');
+    expect(firstId).not.toBe(secondId);
   });
 });
