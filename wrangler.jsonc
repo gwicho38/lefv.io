@@ -7,7 +7,10 @@
   // lefv-tunnel, and a route intercepts at the edge without touching them.
   "routes": [
     { "pattern": "lefv.io/*", "zone_name": "lefv.io" },
-    { "pattern": "www.lefv.io/*", "zone_name": "lefv.io" }
+    { "pattern": "www.lefv.io/*", "zone_name": "lefv.io" },
+    // www.lefv.info already redirects to the apex via a redirect rule, which
+    // runs before Workers, so it needs no route of its own.
+    { "pattern": "lefv.info/*", "zone_name": "lefv.info" }
   ],
   "assets": {
     "directory": "./dist/public",
