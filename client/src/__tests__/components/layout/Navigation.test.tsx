@@ -16,9 +16,10 @@ vi.mock('wouter', () => ({
 }));
 
 describe('Navigation', () => {
-  it('renders the site name', () => {
+  it('renders the wordmark without a domain suffix', () => {
     render(<Navigation />);
-    expect(screen.getByText('lefv.io')).toBeInTheDocument();
+    expect(screen.getByText('lefv')).toBeInTheDocument();
+    expect(screen.queryByText(/lefv\.(io|info)/)).not.toBeInTheDocument();
   });
 
   it('names its sections rather than page types', () => {

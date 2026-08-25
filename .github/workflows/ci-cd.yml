@@ -55,6 +55,17 @@ jobs:
       - name: Install Dependencies
         run: npm ci --legacy-peer-deps
 
+      # Re-running an old run checks out that run's commit and would deploy a
+      # stale tree. Only the current tip of main may ship.
+      - name: Refuse to deploy anything but the tip of main
+        run: |
+          tip=$(git ls-remote origin refs/heads/main | cut -f1)
+          if [ "$tip" != "${{ github.sha }}" ]; then
+            echo "Refusing to deploy ${{ github.sha }}; tip of main is $tip." >&2
+            exit 1
+          fi
+          echo "Deploying tip of main: $tip"
+
       - name: Build
         run: npm run build
 

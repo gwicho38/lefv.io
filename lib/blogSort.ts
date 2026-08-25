@@ -52,9 +52,9 @@ export function renderFeed(posts: BlogPost[], site: string): string {
   return `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0">
   <channel>
-    <title>lefv.io</title>
+    <title>lefv</title>
     <link>${site}</link>
-    <description>Blog posts from lefv.io</description>
+    <description>Writing by Luis E. Fernández de la Vara</description>
     <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>${items}
   </channel>
 </rss>`;

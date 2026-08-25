@@ -13,7 +13,7 @@
     "bake-posts": "tsx scripts/bake-posts.ts",
     "dev": "npm run bake-posts && wrangler dev",
     "build": "npm run bake-posts && vite build",
-    "deploy": "npm run build && wrangler deploy"
+    "deploy": "bash scripts/deploy.sh"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",
