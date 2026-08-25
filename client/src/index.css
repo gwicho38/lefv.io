@@ -8,7 +8,18 @@
   }
 
   body {
-    @apply font-sans antialiased bg-background text-foreground;
+    @apply font-serif antialiased bg-background text-foreground;
+    font-size: 1.0625rem;
+    line-height: 1.7;
+  }
+
+  ::selection {
+    @apply bg-foreground text-background;
+  }
+
+  a:focus-visible,
+  button:focus-visible {
+    @apply outline-none ring-2 ring-offset-2 ring-foreground/60;
   }
 
   /* Hide scrollbar for Chrome, Safari and Opera */
@@ -23,4 +34,38 @@
     scrollbar-width: none;
     /* Firefox */
   }
+}
+@layer components {
+  /* Long-form reading: generous leading, restrained headings, quiet rules. */
+  .prose-post {
+    @apply text-foreground;
+  }
+  .prose-post > * + * {
+    @apply mt-5;
+  }
+  .prose-post h1,
+  .prose-post h2,
+  .prose-post h3 {
+    @apply mt-10 font-semibold leading-snug;
+  }
+  .prose-post h1 { @apply text-xl; }
+  .prose-post h2 { @apply text-lg; }
+  .prose-post h3 { @apply text-base; }
+  .prose-post a {
+    @apply underline underline-offset-4 decoration-foreground/40;
+  }
+  .prose-post ul { @apply list-disc space-y-2 pl-5; }
+  .prose-post ol { @apply list-decimal space-y-2 pl-5; }
+  .prose-post blockquote {
+    @apply border-l pl-4 text-muted-foreground;
+  }
+  .prose-post code {
+    @apply font-mono text-sm;
+  }
+  .prose-post pre {
+    @apply overflow-x-auto rounded border p-4 text-sm;
+  }
+  .prose-post img { @apply max-w-full rounded; }
+  .prose-post hr { @apply my-10 border-t; }
+  .prose-post table { @apply block w-full overflow-x-auto text-sm; }
 }

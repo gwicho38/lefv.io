@@ -1,37 +1,41 @@
 import { Link, useLocation } from "wouter";
 import { cn } from "@/lib/utils";
 
+const links = [
+  { href: "/", label: "Writing" },
+  { href: "/about", label: "About" },
+];
+
 export function Navigation() {
   const [location] = useLocation();
-
-  const links = [
-    { href: "/", label: "Home" },
-    { href: "/blog", label: "Blog" }
-  ];
+  const isWriting = (href: string) =>
+    href === "/" ? location === "/" || location.startsWith("/blog") : location === href;
 
   return (
-    <nav className="border-b bg-card">
-      <div className="container mx-auto px-4">
-        <div className="flex h-16 items-center space-x-8">
-          <div className="text-xl font-semibold">lefv.io</div>
-          <div className="flex space-x-6">
-            {links.map(({ href, label }) => (
-              <Link
-                key={href}
-                href={href}
-                className={cn(
-                  "text-sm font-medium transition-colors hover:text-primary",
-                  location === href 
-                    ? "text-primary" 
-                    : "text-muted-foreground"
-                )}
-              >
-                {label}
-              </Link>
-            ))}
-          </div>
-        </div>
+    <nav className="mx-auto flex max-w-shell items-baseline gap-6 px-5 py-8">
+      <Link href="/" className="font-mono text-sm font-medium tracking-tight">
+        lefv.io
+      </Link>
+      <div className="flex flex-1 gap-5">
+        {links.map(({ href, label }) => (
+          <Link
+            key={href}
+            href={href}
+            className={cn(
+              "font-mono text-sm transition-colors hover:text-foreground",
+              isWriting(href) ? "text-foreground" : "text-muted-foreground",
+            )}
+          >
+            {label}
+          </Link>
+        ))}
       </div>
+      <a
+        href="/feed.xml"
+        className="font-mono text-sm text-muted-foreground transition-colors hover:text-foreground"
+      >
+        RSS
+      </a>
     </nav>
   );
 }
