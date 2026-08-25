@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import { loadAllPosts } from "../server/utils/blogPosts";
+import { loadAllPosts } from "../lib/posts";
 
 const OUT = path.join(process.cwd(), "worker/posts.generated.json");
 

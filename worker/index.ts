@@ -38,7 +38,7 @@ app.get("/api/posts/:slug", c => {
 app.get("/api/tags", c => c.json(collectTags(published)));
 
 app.get("/feed.xml", c => {
-  const site = c.env.SITE_URL || "https://lefv.info";
+  const site = c.env.SITE_URL || "https://lefv.io";
   const xml = renderFeed(sortPosts(published, "newest").slice(0, 50), site);
   return c.body(xml, 200, { "Content-Type": "application/rss+xml; charset=utf-8" });
 });

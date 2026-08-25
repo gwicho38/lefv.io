@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { slugify, readingTimeMinutes } from '../../../../server/utils/blogPosts';
+import { slugify, readingTimeMinutes } from '../../../../lib/posts';
 
 // Utility functions that might exist in your app
 // These are common formatting utilities that would be useful to test

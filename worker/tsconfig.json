@@ -1,6 +1,6 @@
 {
   "extends": "../tsconfig.json",
-  "include": ["./**/*.ts", "../lib/**/*.ts"],
+  "include": ["./**/*.ts", "../lib/blogSort.ts", "../lib/weather.ts"],
   "compilerOptions": {
     "types": ["@cloudflare/workers-types"],
     "resolveJsonModule": true
