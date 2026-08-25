@@ -96,7 +96,7 @@ export class WeatherService {
       throw new Error(`Ambient Weather API error: ${response.status}`);
     }
 
-    const data = await response.json();
+    const data = await response.json() as any;
     const lastData = data[0]?.lastData;
 
     if (!lastData) {
@@ -137,7 +137,7 @@ export class WeatherService {
       throw new Error(`OpenWeatherMap API error: ${response.status}`);
     }
 
-    const data = await response.json();
+    const data = await response.json() as any;
 
     this.log.info('Weather data fetched from OpenWeatherMap', {
       city: data.name,
@@ -182,7 +182,7 @@ export class WeatherService {
       throw new Error(`Weather history API error: ${response.status}`);
     }
 
-    const data = await response.json();
+    const data = await response.json() as any;
 
     if (type === 'temperature') {
       return data.map((item: any) => ({

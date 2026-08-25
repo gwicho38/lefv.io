@@ -11,35 +11,23 @@ vi.mock('chokidar', () => ({
   default: { watch: vi.fn().mockReturnValue({ on: vi.fn().mockReturnThis() }) },
 }));
 
-vi.mock('@db', () => ({
-  db: {
-    insert: vi.fn().mockReturnThis(),
-    delete: vi.fn().mockReturnThis(),
-    where: vi.fn().mockReturnThis(),
-    values: vi.fn().mockReturnThis(),
-    onConflictDoUpdate: vi.fn().mockReturnThis(),
-    returning: vi.fn().mockResolvedValue([]),
-    execute: vi.fn().mockResolvedValue([]),
-  },
-}));
-
-vi.mock('../../utils/blogPosts', () => ({
-  loadAllPosts: vi.fn(),
-  loadPostBySlug: vi.fn(),
-  sortPosts: (posts: BlogPost[]) => posts,
-  parseSortOrder: () => 'newest',
-}));
+vi.mock('../../utils/blogPosts', async () => {
+  const real = await vi.importActual<typeof import('../../../lib/blogSort')>('../../../lib/blogSort');
+  return {
+    loadAllPosts: vi.fn(),
+    loadPostBySlug: vi.fn(),
+    sortPosts: (posts: BlogPost[]) => posts,
+    parseSortOrder: () => 'newest',
+    collectTags: real.collectTags,
+    renderFeed: real.renderFeed,
+  };
+});
 
 vi.mock('../../services/weatherService', () => ({
   weatherService: {
     getCurrentWeather: vi.fn(),
     getWeatherHistory: vi.fn(),
   },
-}));
-
-vi.mock('../../utils/database', () => ({
-  checkDatabaseHealth: vi.fn().mockResolvedValue(true),
-  validateDatabaseConfig: vi.fn().mockReturnValue({ isValid: true, errors: [] }),
 }));
 
 vi.mock('../../utils/logger', () => ({
@@ -81,8 +69,11 @@ describe('API Integration Tests', () => {
     if (server) server.close();
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.clearAllMocks();
+    // /api/health reads the post list, so every test needs a baseline.
+    const { loadAllPosts } = await import('../../utils/blogPosts');
+    (loadAllPosts as any).mockResolvedValue([]);
   });
 
   describe('Health Check Endpoint', () => {
@@ -90,8 +81,8 @@ describe('API Integration Tests', () => {
       const res = await request(app).get('/api/health').expect(200);
       expect(res.body).toHaveProperty('status', 'healthy');
       expect(res.body).toHaveProperty('timestamp');
-      expect(res.body).toHaveProperty('database');
-      expect(res.body.database).toHaveProperty('connected', true);
+      expect(res.body).toHaveProperty('posts');
+      expect(typeof res.body.posts).toBe('number');
     });
 
     it('should include environment information in health check', async () => {

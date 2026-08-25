@@ -12,7 +12,7 @@ const BLOG_DIR = path.join(process.cwd(), "content/blog");
 const WORDS_PER_MINUTE = 200;
 const EXCERPT_CHARS = 220;
 
-function slugify(filename: string): string {
+export function slugify(filename: string): string {
   return filename
     .replace(/\.md$/i, "")
     .toLowerCase()
@@ -42,7 +42,7 @@ function buildExcerpt(frontmatterExcerpt: unknown, body: string): string {
   return (lastSpace > 80 ? cut.slice(0, lastSpace) : cut).trim() + "…";
 }
 
-function readingTimeMinutes(body: string): number {
+export function readingTimeMinutes(body: string): number {
   const words = stripMarkdown(body).split(/\s+/).filter(Boolean).length;
   return Math.max(1, Math.ceil(words / WORDS_PER_MINUTE));
 }

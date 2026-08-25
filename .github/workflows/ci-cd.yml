@@ -9,203 +9,48 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    
-    services:
-      postgres:
-        image: postgres:16
-        env:
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_USER: postgres
-          POSTGRES_DB: test_db
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-    
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
-        cache: 'npm'
-    
-    - name: Install Dependencies
-      run: npm ci --legacy-peer-deps
-    
-    - name: Run Linting
-      run: npm run lint
-      
-    - name: Run Tests
-      run: npm test || true  # Temporarily bypass tests to deploy and setup database
-      env:
-        DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db
-        USE_SUPABASE: 'true'
-        VITE_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-        VITE_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
-        SUPABASE_POSTGRES_URL_DEV: ${{ secrets.SUPABASE_POSTGRES_URL }}
-        SUPABASE_POSTGRES_URL_PROD: ${{ secrets.SUPABASE_POSTGRES_URL }}
-    
-  build:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: Typecheck
+        run: npm run lint
+
+      - name: Typecheck Worker
+        run: npx tsc --noEmit -p worker/tsconfig.json
+
+      - name: Run Tests
+        run: npm test
+
+  deploy:
     needs: test
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/release')
-    
-    steps:
-    - uses: actions/checkout@v4
-    
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
-        cache: 'npm'
-    
-    - name: Install Dependencies
-      run: npm ci --legacy-peer-deps
-    
-    - name: Build
-      run: npm run build
-      env:
-        VITE_APP_ENV: production
-        USE_SUPABASE: 'true'
-        DATABASE_URL: ${{ secrets.SUPABASE_POSTGRES_URL }}
-        VITE_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-        VITE_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
-        SUPABASE_POSTGRES_URL_DEV: ${{ secrets.SUPABASE_POSTGRES_URL }}
-        SUPABASE_POSTGRES_URL_PROD: ${{ secrets.SUPABASE_POSTGRES_URL }}
-        
-    - name: Upload Build Artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: build-artifacts
-        path: dist/
-        
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    # The DigitalOcean droplet is sometimes unreachable from GitHub-hosted
-    # runners. Treat deploy as best-effort so transient SSH timeouts don't
-    # block PR merges; the build artifact is still uploaded by the build job.
-    continue-on-error: true
     if: github.event_name == 'push' && github.ref == 'refs/heads/release'
-    
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Download Build Artifacts
-      uses: actions/download-artifact@v4
-      with:
-        name: build-artifacts
-        path: dist/
-    
-    - name: Create deployment package
-      run: |
-        mkdir -p deploy
-        cp -r dist/* deploy/
-        cp package*.json deploy/
-        cp docker-compose.yml deploy/ || true
-        cp Dockerfile deploy/ || true
-        echo "Creating deployment archive..."
-        tar -czf deploy.tar.gz deploy/
-    
-    - name: Setup SSH Key
-      env:
-        SSH_PRIVATE_KEY: ${{ secrets.DIGITALOCEAN_SSH_KEY_RAW }}
-      run: |
-        echo "Setting up SSH key..."
-        echo "$SSH_PRIVATE_KEY" > /tmp/ssh_key
-        chmod 600 /tmp/ssh_key
-        echo "SSH key configured"
-    
-    - name: Deploy to DigitalOcean
-      run: |
-        scp -i /tmp/ssh_key -o StrictHostKeyChecking=no deploy.tar.gz root@161.35.251.74:/tmp/
-    
-    - name: Setup and restart application
-      run: |
-        ssh -i /tmp/ssh_key -o StrictHostKeyChecking=no root@161.35.251.74 << 'EOF'
-          # Stop existing application
-          pm2 stop lefv_io || true
-          pm2 delete lefv_io || true
-          
-          # Backup previous deployment
-          if [ -d "/var/www/lefv_io" ]; then
-            mv /var/www/lefv_io /var/www/lefv_io_backup_$(date +%Y%m%d_%H%M%S)
-          fi
-          
-          # Create application directory
-          mkdir -p /var/www/lefv_io
-          
-          # Extract new deployment
-          cd /var/www/lefv_io
-          tar -xzf /tmp/deploy.tar.gz --strip-components=1
-          rm -f /tmp/deploy.tar.gz
-          
-          # Create environment file
-          cat > .env << EOF
-          NODE_ENV=production
-          PORT=3000
-          USE_SUPABASE=true
-          DATABASE_URL=${{ secrets.SUPABASE_POSTGRES_URL }}
-          VITE_SUPABASE_URL=${{ secrets.SUPABASE_URL }}
-          VITE_SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}
-          SUPABASE_POSTGRES_URL_DEV=${{ secrets.SUPABASE_POSTGRES_URL }}
-          SUPABASE_POSTGRES_URL_PROD=${{ secrets.SUPABASE_POSTGRES_URL }}
-          SUPABASE_JWT_SECRET=${{ secrets.SUPABASE_JWT_SECRET }}
-          OPENWEATHER_API_KEY=${{ secrets.OPENWEATHER_API_KEY }}
-          EOF
-          
-          # Install Node.js if not present
-          if ! command -v node &> /dev/null; then
-            curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
-            apt-get install -y nodejs
-          fi
-          
-          # Install PM2 if not present
-          if ! command -v pm2 &> /dev/null; then
-            npm install -g pm2
-          fi
-          
-          # Install production dependencies
-          npm install --production --legacy-peer-deps
-          
-          # Start application with PM2
-          pm2 start index.js --name "lefv_io" --env production
-          pm2 save
-          pm2 startup || true
-          
-          # Setup nginx reverse proxy if not configured
-          if [ ! -f "/etc/nginx/sites-available/lefv_io" ]; then
-            cat > /etc/nginx/sites-available/lefv_io << 'NGINX'
-          server {
-              listen 80;
-              server_name lefv.io www.lefv.io;
-              
-              location / {
-                  proxy_pass http://localhost:3000;
-                  proxy_http_version 1.1;
-                  proxy_set_header Upgrade $http_upgrade;
-                  proxy_set_header Connection 'upgrade';
-                  proxy_set_header Host $host;
-                  proxy_set_header X-Real-IP $remote_addr;
-                  proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-                  proxy_set_header X-Forwarded-Proto $scheme;
-                  proxy_cache_bypass $http_upgrade;
-              }
-          }
-          NGINX
-            
-            ln -sf /etc/nginx/sites-available/lefv_io /etc/nginx/sites-enabled/
-            nginx -t && systemctl reload nginx
-          fi
-          
-          echo "Deployment completed successfully!"
-          pm2 status
-        EOF
-        
-        # Clean up SSH key
-        rm -f /tmp/ssh_key
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: Build
+        run: npm run build:worker
+
+      - name: Deploy to Cloudflare Workers
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
