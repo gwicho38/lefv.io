@@ -16,32 +16,32 @@ vi.mock('wouter', () => ({
 }));
 
 describe('Navigation', () => {
-  it('renders the navigation with site name', () => {
+  it('renders the site name', () => {
     render(<Navigation />);
     expect(screen.getByText('lefv.io')).toBeInTheDocument();
   });
 
-  it('renders all navigation links', () => {
+  it('names its sections rather than page types', () => {
     render(<Navigation />);
-    expect(screen.getByText('Home')).toBeInTheDocument();
-    expect(screen.getByText('Blog')).toBeInTheDocument();
+    expect(screen.getByText('Writing')).toBeInTheDocument();
+    expect(screen.getByText('About')).toBeInTheDocument();
   });
 
-  it('applies correct styling to active link', () => {
+  it('offers the feed', () => {
     render(<Navigation />);
-    const homeLink = screen.getByTestId('link-home');
-    const blogLink = screen.getByTestId('link-blog');
-
-    expect(blogLink.className).toContain('text-primary');
-    expect(homeLink.className).toContain('text-muted-foreground');
+    expect(screen.getByText('RSS')).toHaveAttribute('href', '/feed.xml');
   });
 
-  it('has correct href attributes on links', () => {
+  it('marks Writing active on a post URL, since posts live under it', () => {
     render(<Navigation />);
-    const homeLink = screen.getByTestId('link-home');
-    const blogLink = screen.getByTestId('link-blog');
+    expect(screen.getByText('Writing').className).toContain('text-foreground');
+    expect(screen.getByText('About').className).toContain('text-muted-foreground');
+  });
 
-    expect(homeLink).toHaveAttribute('href', '/');
-    expect(blogLink).toHaveAttribute('href', '/blog');
+  it('points Writing at the index', () => {
+    render(<Navigation />);
+    // The wordmark also links to "/", so match on the link text instead.
+    expect(screen.getByText('Writing')).toHaveAttribute('href', '/');
+    expect(screen.getByText('About')).toHaveAttribute('href', '/about');
   });
 });
