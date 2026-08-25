@@ -34,19 +34,6 @@ npm run deploy:worker
 | `CLOUDFLARE_API_TOKEN` | Deploy permission ("Edit Cloudflare Workers" template) |
 | `CLOUDFLARE_ACCOUNT_ID` | Target account |
 
-## Worker secrets
-
-Weather endpoints need credentials set on the Worker itself:
-
-```bash
-npx wrangler secret put OPENWEATHER_API_KEY
-npx wrangler secret put AMBIENT_API_KEY
-npx wrangler secret put AMBIENT_APP_KEY
-npx wrangler secret put AMBIENT_MAC_ADDRESS
-```
-
-Without them, `/api/weather` returns 500 and the rest of the site is unaffected.
-
 ## Local development
 
 ```bash

@@ -23,13 +23,6 @@ vi.mock('../../utils/blogPosts', async () => {
   };
 });
 
-vi.mock('../../services/weatherService', () => ({
-  weatherService: {
-    getCurrentWeather: vi.fn(),
-    getWeatherHistory: vi.fn(),
-  },
-}));
-
 vi.mock('../../utils/logger', () => ({
   logError: vi.fn(),
   logInfo: vi.fn(),
@@ -156,38 +149,6 @@ describe('API Integration Tests', () => {
 
       const res = await request(app).get('/api/tags').expect(200);
       expect(res.body).toEqual([]);
-    });
-  });
-
-  describe('Weather Endpoints', () => {
-    it('should return current weather data', async () => {
-      const { weatherService } = await import('../../services/weatherService');
-      const mockData = {
-        temperature: 20.5,
-        humidity: 65,
-        windSpeed: 5.2,
-        pressure: 1013.25,
-        windDir: 180,
-        feelsLike: 19.0,
-        source: 'openweather',
-        city: 'Paris',
-        country: 'FR',
-      };
-      (weatherService.getCurrentWeather as any).mockResolvedValue(mockData);
-
-      const res = await request(app).get('/api/weather').expect(200);
-      expect(res.body).toEqual(mockData);
-    });
-
-    it('should handle weather service errors gracefully', async () => {
-      const { weatherService } = await import('../../services/weatherService');
-      (weatherService.getCurrentWeather as any).mockRejectedValue(new Error('Service unavailable'));
-
-      await request(app).get('/api/weather').expect(500);
-    });
-
-    it('should validate weather history type parameter', async () => {
-      await request(app).get('/api/weather/history/invalid-type').expect(400);
     });
   });
 

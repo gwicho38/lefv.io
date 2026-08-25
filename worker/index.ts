@@ -3,17 +3,10 @@ import { cors } from "hono/cors";
 import bakedPosts from "./posts.generated.json";
 import type { BlogPost } from "../lib/blogSort";
 import { collectTags, parseSortOrder, renderFeed, sortPosts } from "../lib/blogSort";
-import { WeatherService } from "../lib/weather";
 
 type Env = {
   ASSETS: Fetcher;
   SITE_URL?: string;
-  AMBIENT_API_KEY?: string;
-  AMBIENT_APP_KEY?: string;
-  AMBIENT_MAC_ADDRESS?: string;
-  OPENWEATHER_API_KEY?: string;
-  OPENWEATHER_CITY?: string;
-  OPENWEATHER_COUNTRY?: string;
 };
 
 const allPosts = bakedPosts as BlogPost[];
@@ -24,15 +17,6 @@ const app = new Hono<{ Bindings: Env }>();
 // Credentials stay off: these endpoints are public and unauthenticated, so a
 // credentialed cross-origin read has nothing to steal. Adding auth means revisiting this.
 app.use("/api/*", cors({ origin: "*", credentials: false }));
-
-const weatherFor = (env: Env) => new WeatherService(() => ({
-  ambientApiKey: env.AMBIENT_API_KEY,
-  ambientAppKey: env.AMBIENT_APP_KEY,
-  ambientMacAddress: env.AMBIENT_MAC_ADDRESS,
-  openWeatherApiKey: env.OPENWEATHER_API_KEY,
-  openWeatherCity: env.OPENWEATHER_CITY,
-  openWeatherCountry: env.OPENWEATHER_COUNTRY,
-}));
 
 app.get("/api/health", c => c.json({
   status: "healthy",
@@ -57,26 +41,6 @@ app.get("/feed.xml", c => {
   const site = c.env.SITE_URL || "https://lefv.info";
   const xml = renderFeed(sortPosts(published, "newest").slice(0, 50), site);
   return c.body(xml, 200, { "Content-Type": "application/rss+xml; charset=utf-8" });
-});
-
-app.get("/api/weather", async c => {
-  try {
-    return c.json(await weatherFor(c.env).getCurrentWeather());
-  } catch {
-    return c.json({ message: "Failed to fetch weather data" }, 500);
-  }
-});
-
-app.get("/api/weather/history/:type", async c => {
-  const type = c.req.param("type");
-  if (type !== "temperature" && type !== "precipitation") {
-    return c.json({ message: "Invalid type parameter. Must be 'temperature' or 'precipitation'" }, 400);
-  }
-  try {
-    return c.json(await weatherFor(c.env).getWeatherHistory(type));
-  } catch {
-    return c.json({ message: "Weather API keys or MAC address not configured" }, 500);
-  }
 });
 
 app.all("*", c => c.env.ASSETS.fetch(c.req.raw));
