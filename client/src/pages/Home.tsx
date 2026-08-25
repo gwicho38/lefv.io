@@ -33,8 +33,7 @@ export default function Home() {
           Luis E. Fernández de la Vara
         </h1>
         <p className="mt-2 text-muted-foreground">
-          Attorney and software engineer. I write about criminal procedure,
-          security, and the game theory underneath both.
+          Attorney and software engineer.
         </p>
       </header>
 
