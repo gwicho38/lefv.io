@@ -8,7 +8,6 @@ import { WeatherService } from "../lib/weather";
 type Env = {
   ASSETS: Fetcher;
   SITE_URL?: string;
-  ALLOWED_ORIGINS?: string;
   AMBIENT_API_KEY?: string;
   AMBIENT_APP_KEY?: string;
   AMBIENT_MAC_ADDRESS?: string;
@@ -22,13 +21,9 @@ const published = allPosts.filter(p => !p.draft);
 
 const app = new Hono<{ Bindings: Env }>();
 
-app.use("/api/*", cors({
-  origin: (origin, c) => {
-    const allowed = c.env.ALLOWED_ORIGINS?.split(",").map(s => s.trim());
-    return !allowed || allowed.includes(origin) ? origin : null;
-  },
-  credentials: true,
-}));
+// Credentials stay off: these endpoints are public and unauthenticated, so a
+// credentialed cross-origin read has nothing to steal. Adding auth means revisiting this.
+app.use("/api/*", cors({ origin: "*", credentials: false }));
 
 const weatherFor = (env: Env) => new WeatherService(() => ({
   ambientApiKey: env.AMBIENT_API_KEY,
