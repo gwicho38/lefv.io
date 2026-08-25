@@ -3,6 +3,16 @@
 @tailwind utilities;
 
 @layer base {
+  /* The generated theme sets --muted-foreground identical to --foreground, so
+     every secondary element rendered at full weight. Restore the distinction. */
+  :root {
+    --muted-foreground: 195 12% 42%;
+  }
+
+  .dark {
+    --muted-foreground: 190 14% 62%;
+  }
+
   * {
     @apply border-border;
   }
