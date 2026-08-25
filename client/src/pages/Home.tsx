@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Masthead } from "@/components/layout/Masthead";
+import { Column } from "@/components/layout/Layout";
 import { PostFilters } from "@/components/blog/PostFilters";
 import { PostIndex, type Post } from "@/components/blog/PostIndex";
 import { filterPosts, collectTagNames } from "@/lib/filterPosts";
@@ -27,14 +28,14 @@ export default function Home() {
   return (
     <div>
       <Masthead />
+      <Column>
 
       <header className="mb-12 max-w-measure">
         <h1 className="text-2xl font-bold tracking-tight">
           Luis E. Fernández de la Vara
         </h1>
         <p className="mt-2 text-muted-foreground">
-          Attorney and software engineer. I write about criminal procedure,
-          security, and the game theory underneath both.
+          Attorney and software engineer.
         </p>
       </header>
 
@@ -73,6 +74,7 @@ export default function Home() {
           Nothing published yet.
         </p>
       )}
+      </Column>
     </div>
   );
 }
