@@ -43,6 +43,9 @@ app.get("/feed.xml", c => {
   return c.body(xml, 200, { "Content-Type": "application/rss+xml; charset=utf-8" });
 });
 
+// Unknown API paths must not fall through to the SPA shell.
+app.all("/api/*", c => c.json({ message: "Not found" }, 404));
+
 app.all("*", c => c.env.ASSETS.fetch(c.req.raw));
 
 export default app;
