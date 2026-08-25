@@ -2,10 +2,10 @@ import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
 
-import type { BlogPost } from "../../lib/blogSort";
+import type { BlogPost } from "./blogSort";
 
-export type { BlogPost, BlogTag, SortOrder } from "../../lib/blogSort";
-export { sortPosts, parseSortOrder, collectTags, renderFeed } from "../../lib/blogSort";
+export type { BlogPost, BlogTag, SortOrder } from "./blogSort";
+export { sortPosts, parseSortOrder, collectTags, renderFeed } from "./blogSort";
 
 const BLOG_DIR = path.join(process.cwd(), "content/blog");
 

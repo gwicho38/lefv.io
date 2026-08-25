@@ -21,7 +21,6 @@ export default defineConfig({
         '**/vite.config.ts',
         '**/vitest.config.ts',
         'client/src/__tests__/**',
-        'server/__tests__/**',
         'client/src/components/ui/**', // Exclude shadcn components
         '**/*.test.{ts,tsx}',
         '**/*.spec.{ts,tsx}',
