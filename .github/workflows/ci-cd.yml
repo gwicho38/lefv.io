@@ -50,7 +50,7 @@ jobs:
         run: npm ci --legacy-peer-deps
 
       - name: Build
-        run: npm run build:worker
+        run: npm run build
 
       # Uses the wrangler npm ci already installed, so CI deploys with the
       # version the repo pins rather than one the action picks.
