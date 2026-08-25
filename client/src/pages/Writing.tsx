@@ -1,6 +1,5 @@
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Masthead } from "@/components/layout/Masthead";
 import { Column } from "@/components/layout/Layout";
 import { PostFilters } from "@/components/blog/PostFilters";
 import { PostIndex, type Post } from "@/components/blog/PostIndex";
@@ -12,7 +11,7 @@ async function fetchPosts(): Promise<Post[]> {
   return res.json();
 }
 
-export default function Home() {
+export default function Writing() {
   const [query, setQuery] = useState("");
   const [tag, setTag] = useState<string | null>(null);
 
@@ -27,7 +26,6 @@ export default function Home() {
 
   return (
     <div>
-      <Masthead />
       <Column>
 
       <header className="mb-12 max-w-measure">

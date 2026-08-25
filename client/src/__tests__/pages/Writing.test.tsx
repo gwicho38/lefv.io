@@ -2,7 +2,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { vi } from 'vitest';
-import Home from '@/pages/Home';
+import Writing from '@/pages/Writing';
 
 vi.mock('wouter', () => ({
   Link: ({ href, className, children }: any) => (
@@ -23,30 +23,25 @@ const posts = [
   },
 ];
 
-const renderHome = () => {
+const renderWriting = () => {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
-    <QueryClientProvider client={queryClient}><Home /></QueryClientProvider>
+    <QueryClientProvider client={queryClient}><Writing /></QueryClientProvider>
   );
 };
 
-describe('Home', () => {
+describe('Writing', () => {
   beforeEach(() => {
     global.fetch = vi.fn().mockResolvedValue({ ok: true, json: async () => posts }) as any;
   });
 
-  it('shows the masthead wordmark without a domain suffix', () => {
-    renderHome();
-    expect(screen.getByText('lefv')).toBeInTheDocument();
-  });
-
   it('leads with who the site belongs to', () => {
-    renderHome();
+    renderWriting();
     expect(screen.getByText('Luis E. Fernández de la Vara')).toBeInTheDocument();
   });
 
   it('lists the writing grouped by year', async () => {
-    renderHome();
+    renderWriting();
     await waitFor(() => {
       expect(screen.getByText('A Long Paper')).toBeInTheDocument();
       expect(screen.getByText('2025')).toBeInTheDocument();
@@ -55,7 +50,7 @@ describe('Home', () => {
 
   it('narrows the list as you search', async () => {
     const user = userEvent.setup();
-    renderHome();
+    renderWriting();
     await waitFor(() => expect(screen.getByText('A Long Paper')).toBeInTheDocument());
 
     await user.type(screen.getByLabelText('Search writing'), 'security');
@@ -68,7 +63,7 @@ describe('Home', () => {
 
   it('filters by clicking a tag, and clears again', async () => {
     const user = userEvent.setup();
-    renderHome();
+    renderWriting();
     await waitFor(() => expect(screen.getByText('A Long Paper')).toBeInTheDocument());
 
     await user.click(screen.getByRole('button', { name: 'game-theory' }));
@@ -84,7 +79,7 @@ describe('Home', () => {
 
   it('says so when nothing matches, rather than showing an empty page', async () => {
     const user = userEvent.setup();
-    renderHome();
+    renderWriting();
     await waitFor(() => expect(screen.getByText('A Long Paper')).toBeInTheDocument());
 
     await user.type(screen.getByLabelText('Search writing'), 'zzzz');
@@ -96,7 +91,7 @@ describe('Home', () => {
 
   it('explains itself when posts cannot load', async () => {
     global.fetch = vi.fn().mockResolvedValue({ ok: false }) as any;
-    renderHome();
+    renderWriting();
     await waitFor(() => {
       expect(screen.getByText(/not loading right now/i)).toBeInTheDocument();
     });

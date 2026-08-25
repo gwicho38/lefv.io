@@ -2,14 +2,16 @@ import { Link, useLocation } from "wouter";
 import { cn } from "@/lib/utils";
 
 const links = [
-  { href: "/", label: "Writing" },
+  { href: "/writing", label: "Writing" },
   { href: "/about", label: "About" },
 ];
 
 export function Navigation() {
   const [location] = useLocation();
-  const isWriting = (href: string) =>
-    href === "/" ? location === "/" || location.startsWith("/blog") : location === href;
+  const isActive = (href: string) =>
+    href === "/writing"
+      ? location === "/writing" || location.startsWith("/blog")
+      : location === href;
 
   return (
     <nav className="mx-auto flex max-w-shell items-baseline gap-6 px-5 py-8">
@@ -23,7 +25,7 @@ export function Navigation() {
             href={href}
             className={cn(
               "font-mono text-sm transition-colors hover:text-foreground",
-              isWriting(href) ? "text-foreground" : "text-muted-foreground",
+              isActive(href) ? "text-foreground" : "text-muted-foreground",
             )}
           >
             {label}

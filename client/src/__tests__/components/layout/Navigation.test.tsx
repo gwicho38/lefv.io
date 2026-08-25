@@ -39,10 +39,14 @@ describe('Navigation', () => {
     expect(screen.getByText('About').className).toContain('text-muted-foreground');
   });
 
-  it('points Writing at the index', () => {
+  it('points Writing at its own page, never at the current route', () => {
     render(<Navigation />);
-    // The wordmark also links to "/", so match on the link text instead.
-    expect(screen.getByText('Writing')).toHaveAttribute('href', '/');
+    expect(screen.getByText('Writing')).toHaveAttribute('href', '/writing');
     expect(screen.getByText('About')).toHaveAttribute('href', '/about');
+  });
+
+  it('keeps the wordmark pointing at the landing page', () => {
+    render(<Navigation />);
+    expect(screen.getByText('lefv')).toHaveAttribute('href', '/');
   });
 });
