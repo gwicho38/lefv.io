@@ -46,6 +46,30 @@ app.get("/feed.xml", c => {
 // Unknown API paths must not fall through to the SPA shell.
 app.all("/api/*", c => c.json({ message: "Not found" }, 404));
 
-app.all("*", c => c.env.ASSETS.fetch(c.req.raw));
+// The paths readers and feed clients actually guess.
+const FEED_ALIASES = ["/rss", "/rss.xml", "/feed", "/feed.rss", "/atom.xml", "/index.xml"];
+for (const alias of FEED_ALIASES) {
+  app.get(alias, c => c.redirect("/feed.xml", 301));
+}
+
+const isAppRoute = (path: string) =>
+  path === "/" ||
+  path === "/about" ||
+  path === "/blog" ||
+  published.some(post => path === `/blog/${post.slug}`);
+
+app.all("*", async c => {
+  const asset = await c.env.ASSETS.fetch(c.req.raw);
+  if (asset.status !== 404) return asset;
+
+  // Client-side routes have no file of their own, so the shell stands in for
+  // them — with a 404 status when the route is not one the app can render.
+  const url = new URL(c.req.url);
+  const shell = await c.env.ASSETS.fetch(new Request(`${url.origin}/index.html`));
+  return new Response(shell.body, {
+    status: isAppRoute(url.pathname) ? 200 : 404,
+    headers: { "Content-Type": "text/html; charset=utf-8" },
+  });
+});
 
 export default app;
