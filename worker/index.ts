@@ -12,6 +12,12 @@ type Env = {
 const allPosts = bakedPosts as BlogPost[];
 const published = allPosts.filter(p => !p.draft);
 
+// The index never renders post bodies, and shipping them dominates the
+// payload — 143KB of 148KB at five posts. Full text stays on the single-post
+// endpoint.
+const toIndexEntry = ({ id, slug, title, excerpt, readingTime, createdAt, tags }: BlogPost) =>
+  ({ id, slug, title, excerpt, readingTime, createdAt, tags });
+
 const app = new Hono<{ Bindings: Env }>();
 
 // Credentials stay off: these endpoints are public and unauthenticated, so a
@@ -26,7 +32,7 @@ app.get("/api/health", c => c.json({
 }));
 
 app.get("/api/posts", c =>
-  c.json(sortPosts(published, parseSortOrder(c.req.query("sort")))));
+  c.json(sortPosts(published, parseSortOrder(c.req.query("sort"))).map(toIndexEntry)));
 
 app.get("/api/posts/:slug", c => {
   const post = allPosts.find(p => p.slug === c.req.param("slug"));

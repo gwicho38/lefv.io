@@ -6,6 +6,12 @@ on:
   pull_request:
     branches: [ main ]
 
+# wrangler deploy has no notion of "newer": whichever run finishes last wins.
+# Serialise publishes so a slow or re-run job cannot overwrite a newer deploy.
+concurrency:
+  group: publish-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   test:
     runs-on: ubuntu-latest
