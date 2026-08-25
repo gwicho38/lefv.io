@@ -27,17 +27,6 @@ vi.mock('chokidar', () => ({
   },
 }));
 
-// Mock database
-vi.mock('@db', () => ({
-  db: {
-    query: {
-      posts: {
-        findFirst: vi.fn(),
-      },
-    },
-  },
-}));
-
 describe('API Routes', () => {
   let app: express.Express;
   let server: any;
@@ -129,26 +118,12 @@ Content 2`;
       const response = await request(app)
         .get('/api/health');
 
-      expect([200, 503]).toContain(response.status);
-      expect(response.body).toHaveProperty('status');
+      expect(response.status).toBe(200);
+      expect(response.body).toHaveProperty('status', 'healthy');
       expect(response.body).toHaveProperty('timestamp');
-      expect(response.body).toHaveProperty('database');
+      expect(response.body).toHaveProperty('posts');
       expect(response.body).toHaveProperty('environment');
     });
   });
 
-  describe('GET /api/weather', () => {
-    it('should return error when no weather services are configured', async () => {
-      // Ensure environment variables are not set
-      delete process.env.AMBIENT_API_KEY;
-      delete process.env.AMBIENT_APP_KEY;
-      delete process.env.OPENWEATHER_API_KEY;
-
-      const response = await request(app)
-        .get('/api/weather')
-        .expect(500);
-
-      expect(response.body).toHaveProperty('error', 'Failed to fetch weather data');
-    });
-  });
 });

@@ -1,5 +1,5 @@
 {
-  "include": ["client/src/**/*", "db/**/*", "server/**/*", "types/**/*"],
+  "include": ["client/src/**/*", "lib/**/*", "server/**/*", "types/**/*"],
   "exclude": ["node_modules", "build", "dist"],
   "compilerOptions": {
     "incremental": true,
@@ -16,8 +16,6 @@
     "baseUrl": ".",
     "types": ["node", "vite/client", "vitest/globals"],
     "paths": {
-      "@db": ["./db/index.ts"],
-      "@db/*": ["./db/*"],
       "@/*": ["./client/src/*"]
     }
   }

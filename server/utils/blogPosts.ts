@@ -2,28 +2,17 @@ import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
 
+import type { BlogPost } from "../../lib/blogSort";
+
+export type { BlogPost, BlogTag, SortOrder } from "../../lib/blogSort";
+export { sortPosts, parseSortOrder, collectTags, renderFeed } from "../../lib/blogSort";
+
 const BLOG_DIR = path.join(process.cwd(), "content/blog");
-
-export type BlogTag = { id: number; name: string };
-
-export type BlogPost = {
-  id: number;
-  slug: string;
-  title: string;
-  content: string;
-  excerpt: string;
-  readingTime: number;
-  createdAt: string;
-  draft: boolean;
-  tags: BlogTag[];
-};
-
-export type SortOrder = "newest" | "oldest" | "title";
 
 const WORDS_PER_MINUTE = 200;
 const EXCERPT_CHARS = 220;
 
-function slugify(filename: string): string {
+export function slugify(filename: string): string {
   return filename
     .replace(/\.md$/i, "")
     .toLowerCase()
@@ -53,7 +42,7 @@ function buildExcerpt(frontmatterExcerpt: unknown, body: string): string {
   return (lastSpace > 80 ? cut.slice(0, lastSpace) : cut).trim() + "…";
 }
 
-function readingTimeMinutes(body: string): number {
+export function readingTimeMinutes(body: string): number {
   const words = stripMarkdown(body).split(/\s+/).filter(Boolean).length;
   return Math.max(1, Math.ceil(words / WORDS_PER_MINUTE));
 }
@@ -87,22 +76,6 @@ export async function loadAllPosts(opts: { includeDrafts?: boolean } = {}): Prom
   );
 
   return opts.includeDrafts ? posts : posts.filter(p => !p.draft);
-}
-
-export function sortPosts(posts: BlogPost[], order: SortOrder): BlogPost[] {
-  const out = [...posts];
-  if (order === "oldest") {
-    out.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
-  } else if (order === "title") {
-    out.sort((a, b) => a.title.localeCompare(b.title));
-  } else {
-    out.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-  }
-  return out;
-}
-
-export function parseSortOrder(value: unknown): SortOrder {
-  return value === "oldest" || value === "title" ? value : "newest";
 }
 
 export async function loadPostBySlug(slug: string): Promise<BlogPost | null> {
