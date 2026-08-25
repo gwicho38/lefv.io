@@ -2,23 +2,12 @@ import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
 
+import type { BlogPost } from "../../lib/blogSort";
+
+export type { BlogPost, BlogTag, SortOrder } from "../../lib/blogSort";
+export { sortPosts, parseSortOrder, collectTags, renderFeed } from "../../lib/blogSort";
+
 const BLOG_DIR = path.join(process.cwd(), "content/blog");
-
-export type BlogTag = { id: number; name: string };
-
-export type BlogPost = {
-  id: number;
-  slug: string;
-  title: string;
-  content: string;
-  excerpt: string;
-  readingTime: number;
-  createdAt: string;
-  draft: boolean;
-  tags: BlogTag[];
-};
-
-export type SortOrder = "newest" | "oldest" | "title";
 
 const WORDS_PER_MINUTE = 200;
 const EXCERPT_CHARS = 220;
@@ -87,22 +76,6 @@ export async function loadAllPosts(opts: { includeDrafts?: boolean } = {}): Prom
   );
 
   return opts.includeDrafts ? posts : posts.filter(p => !p.draft);
-}
-
-export function sortPosts(posts: BlogPost[], order: SortOrder): BlogPost[] {
-  const out = [...posts];
-  if (order === "oldest") {
-    out.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
-  } else if (order === "title") {
-    out.sort((a, b) => a.title.localeCompare(b.title));
-  } else {
-    out.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-  }
-  return out;
-}
-
-export function parseSortOrder(value: unknown): SortOrder {
-  return value === "oldest" || value === "title" ? value : "newest";
 }
 
 export async function loadPostBySlug(slug: string): Promise<BlogPost | null> {
