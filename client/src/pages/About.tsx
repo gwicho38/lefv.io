@@ -48,7 +48,8 @@ export default function About() {
         <h2 className="mb-4 font-mono text-xs text-muted-foreground">
           Something to play with
         </h2>
-        <div className="aspect-[4/3] w-full max-w-xl overflow-hidden rounded border">
+        {/* Pico-8 renders a square display, so a 4:3 box cropped the cartridge. */}
+        <div className="aspect-square w-full max-w-[460px] overflow-hidden rounded border">
           <iframe
             src="https://www.lexaloffle.com/bbs/widget.php?pid=picochill"
             title="Pico-8 cartridge"
