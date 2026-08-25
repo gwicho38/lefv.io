@@ -14,7 +14,7 @@ export function Navigation() {
   return (
     <nav className="mx-auto flex max-w-shell items-baseline gap-6 px-5 py-8">
       <Link href="/" className="font-mono text-sm font-medium tracking-tight">
-        lefv.io
+        lefv
       </Link>
       <div className="flex flex-1 gap-5">
         {links.map(({ href, label }) => (
