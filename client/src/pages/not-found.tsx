@@ -1,7 +1,9 @@
 import { Link } from "wouter";
+import { Column } from "@/components/layout/Layout";
 
 export default function NotFound() {
   return (
+    <Column>
     <div className="max-w-measure">
       <h1 className="text-2xl font-bold tracking-tight">Not found</h1>
       <p className="mt-3 text-muted-foreground">
@@ -19,5 +21,6 @@ export default function NotFound() {
         </a>
       </div>
     </div>
+    </Column>
   );
 }

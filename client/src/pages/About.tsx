@@ -1,5 +1,8 @@
+import { Column } from "@/components/layout/Layout";
+
 export default function About() {
   return (
+    <Column>
     <div>
       <header className="mb-10 max-w-measure">
         <h1 className="text-2xl font-bold tracking-tight">About</h1>
@@ -60,5 +63,6 @@ export default function About() {
         </div>
       </section>
     </div>
+    </Column>
   );
 }

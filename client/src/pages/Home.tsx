@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Masthead } from "@/components/layout/Masthead";
+import { Column } from "@/components/layout/Layout";
 import { PostFilters } from "@/components/blog/PostFilters";
 import { PostIndex, type Post } from "@/components/blog/PostIndex";
 import { filterPosts, collectTagNames } from "@/lib/filterPosts";
@@ -27,6 +28,7 @@ export default function Home() {
   return (
     <div>
       <Masthead />
+      <Column>
 
       <header className="mb-12 max-w-measure">
         <h1 className="text-2xl font-bold tracking-tight">
@@ -72,6 +74,7 @@ export default function Home() {
           Nothing published yet.
         </p>
       )}
+      </Column>
     </div>
   );
 }

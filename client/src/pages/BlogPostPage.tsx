@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { Column } from "@/components/layout/Layout";
 import { Link, useRoute } from "wouter";
 import { format } from "date-fns";
 import ReactMarkdown from "react-markdown";
@@ -22,21 +23,24 @@ export default function BlogPostPage() {
   });
 
   if (isLoading) {
-    return <p className="font-mono text-sm text-muted-foreground">Loading…</p>;
+    return <Column><p className="font-mono text-sm text-muted-foreground">Loading…</p></Column>;
   }
 
   if (error || !post) {
     return (
+      <Column>
       <div className="max-w-measure">
         <p className="mb-4">That post is not here.</p>
         <Link href="/" className="font-mono text-sm underline underline-offset-4">
           Back to writing
         </Link>
       </div>
+      </Column>
     );
   }
 
   return (
+    <Column>
     <article className="max-w-measure">
       <header className="mb-10">
         <h1 className="text-2xl font-bold leading-tight tracking-tight">
@@ -63,5 +67,6 @@ export default function BlogPostPage() {
         </Link>
       </footer>
     </article>
+    </Column>
   );
 }
