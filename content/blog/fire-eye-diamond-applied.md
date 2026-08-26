@@ -2,63 +2,33 @@
 title: The Diamond Model and the FireEye Cyberattack
 date: 2024-01-18
 tags: ['hack', 'security']
+excerpt: "Running the 2020 FireEye breach through the Diamond Model, and what it says about who can actually deter state-sponsored attacks."
 ---
-## Understanding the FireEye Cyberattack
 
-In December 2020, cybersecurity giant **FireEye** made headlines when it reported a sophisticated cyberattack carried out by "foreign government hackers." The attackers gained access to **FireEye’s red-team tools**, which are typically used to test and strengthen security defenses. This breach had wide-reaching implications, highlighting vulnerabilities in government contractors and raising alarms across the cybersecurity industry.
+In December 2020 FireEye reported that foreign government hackers had taken its red-team tools — the software it uses to test and strengthen its clients' defenses. A security company had its own offensive toolkit stolen, which is a bad day for the company and a worse one for everyone downstream of it.
 
-In this blog, we break down the FireEye attack using the **Diamond Model of Intrusion Analysis**, examining the adversary, their capabilities, infrastructure, and FireEye itself as the victim. We’ll also discuss the **policy implications** of state-sponsored cyberattacks and why international cooperation is crucial.
+The Diamond Model of Intrusion Analysis is a useful way to take that apart. It looks at an intrusion along four vertices: adversary, capability, infrastructure, and victim.
 
-## The Diamond Model Breakdown
+## Adversary
 
-### 1. The Adversary: Who’s Behind the Attack?
+FireEye attributed the attack to nation-state espionage, with strong indications pointing to Cozy Bear (APT29), a group linked to Russia's Foreign Intelligence Service. APT29 was also implicated in the SolarWinds attack earlier that year.
 
-FireEye attributes the attack to a **nation-state cyber-espionage effort**, with strong indications pointing to **Cozy Bear/APT29**, a hacking group linked to **Russia’s Foreign Intelligence Service (SVR)**. This attack is part of a broader pattern, with APT29 also being implicated in the infamous **SolarWinds attack** earlier in 2020.
+The motive is straightforward. Stealing tools built to find weaknesses in real systems is an upgrade to your own arsenal, obtained at a fraction of the cost of building it.
 
-The likely **motive**? Espionage and disruption. By targeting FireEye, the hackers gained **access to cybersecurity tools that could be used to test and bypass defenses**, an advantage in future cyber operations.
+## Capability
 
-### 2. Advanced Capabilities of APT29
+APT29 is not an average group. Spear phishing with self-extracting archive attachments, Cobalt Strike rootkits, custom malware including WellMess and WellMail, and stealthy command-and-control — including issuing commands over Twitter.
 
-APT29 isn’t your average hacking group. They utilize:
+## Infrastructure
 
-- **Spear phishing attacks** with self-extracting archive attachments.
-- **Cobalt Strike rootkits** and custom malware such as **WellMess and WellMail**.
-- **Stealthy C2 (Command and Control) techniques**, including Twitter-based communication methods.
-- **Exfiltration of FireEye’s red-team tools**, effectively upgrading their own cyber arsenal.
+The infrastructure is built to blend in. HAMMERTOSS malware pulls commands from Twitter accounts. Type 2 infrastructure routes exfiltration indirectly. Ordinary service providers — ISPs, domain registrars — carry traffic that looks unremarkable. Traditional detection struggles because nothing about it looks out of place.
 
-### 3. APT29’s Infrastructure: The Stealth Behind the Attack
+## Victim
 
-APT29’s attack infrastructure is meticulously designed. They leverage:
+FireEye was targeted for two things: government customer data, useful for broader espionage, and the red-team tools themselves.
 
-- **HAMMERTOSS malware**, which uses Twitter accounts to issue covert commands.
-- **Type 2 infrastructure**, using indirect paths to mask data exfiltration.
-- **Service providers** (ISPs, domain registrars) to blend in with legitimate traffic.
+## The part companies cannot solve
 
-This level of sophistication makes it incredibly difficult for traditional security tools to detect and block their activities.
+A private company can harden itself. It cannot deter a nation-state. That asymmetry is the actual lesson of the breach, and it is not one that better security products fix.
 
-### 4. The Victim: Why FireEye?
-
-As a leading cybersecurity firm, **FireEye** plays a major role in detecting and responding to cyber threats worldwide. That made it a prime target. The attackers focused on:
-
-- **Government customer data**, which could facilitate broader espionage operations.
-- **Red-team tools**, which could be used to simulate attacks and uncover vulnerabilities in real-world systems.
-
-## The Bigger Picture: Policy Implications and Global Response
-
-So what can be done about these attacks? While private companies can **strengthen their defenses**, they alone can’t **deter nation-state cyber threats**. This is a **global problem** requiring a **coordinated international response**.
-
-### Why International Cooperation is Essential
-
-Cyberwarfare is **not an isolated issue**. APT attacks like this can:
-
-1. Escalate geopolitical tensions.
-2. Undermine national security.
-3. Destabilize critical infrastructure worldwide.
-
-**Global frameworks** like the **Council of Europe Convention on Cybercrime**, the **Shanghai Cooperation Organization Cybersecurity Initiative**, and the **ASEAN Declaration to Prevent and Combat Cybercrime** provide starting points. However, a more **comprehensive international treaty** is needed to address state-sponsored cyberattacks.
-
-## Conclusion: The Future of Cybersecurity
-
-The FireEye attack underscores how sophisticated and well-funded **nation-state cyber threats** have become. The **Diamond Model** provides an effective way to analyze these threats, but ultimately, **cybersecurity isn’t just a private-sector issue—it’s a global one**.
-
-Without **stronger international policies and cooperation**, we risk an escalation in cyber conflicts that could impact industries, governments, and individuals alike. The time for action is now.
+There are starting points — the Council of Europe Convention on Cybercrime, the Shanghai Cooperation Organization's cybersecurity initiative, the ASEAN Declaration to Prevent and Combat Cybercrime. None of them squarely addresses state-sponsored attacks. Until something does, the defending party in these incidents is structurally outmatched, and analysis like the Diamond Model tells us precisely who we are losing to without telling us how to stop them.
