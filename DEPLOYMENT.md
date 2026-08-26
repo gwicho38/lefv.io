@@ -21,6 +21,18 @@ Frontmatter keys: `title`, `date`, `excerpt`, `tags`, `draft`. A post with
 
 The filename becomes the slug: `My First Post.md` serves at `/blog/my-first-post`.
 
+## Images in a post
+
+Put the file in `client/public/images/` and reference it with an absolute path:
+
+```markdown
+![Alt text](/images/my-picture.png)
+```
+
+Vite copies that directory into the build and the Worker serves it from the
+assets binding, where static assets are free and uncapped. Nothing else to
+configure, and no external image host involved.
+
 ## How posts reach the Worker
 
 Workers have no filesystem, so posts cannot be read at request time. `npm run
