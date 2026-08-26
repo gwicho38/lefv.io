@@ -3,14 +3,52 @@
 @tailwind utilities;
 
 @layer base {
-  /* The generated theme sets --muted-foreground identical to --foreground, so
-     every secondary element rendered at full weight. Restore the distinction. */
+  /* --muted-foreground is held apart from --foreground on purpose; matching them
+     renders every secondary element at full weight. */
   :root {
+    --background: 182 55% 97%;
+    --foreground: 188 100% 1%;
+    --muted: 183 56% 82%;
     --muted-foreground: 195 12% 42%;
+    --popover: 182 55% 97%;
+    --popover-foreground: 188 100% 1%;
+    --card: 182 55% 97%;
+    --card-foreground: 188 100% 1%;
+    --border: 183 56% 82%;
+    --input: 183 56% 82%;
+    --primary: 182 100% 22%;
+    --primary-foreground: 182 26% 98%;
+    --secondary: 183 79% 87%;
+    --secondary-foreground: 188 100% 1%;
+    --accent: 183 79% 87%;
+    --accent-foreground: 188 100% 1%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 60 9.1% 97.8%;
+    --ring: 182 100% 22%;
+    --radius: 1rem;
   }
 
   .dark {
+    --background: 183 42% 7%;
+    --foreground: 183 56% 82%;
+    --muted: 183 100% 10%;
     --muted-foreground: 190 14% 62%;
+    --popover: 183 42% 7%;
+    --popover-foreground: 183 56% 82%;
+    --card: 183 42% 7%;
+    --card-foreground: 183 56% 82%;
+    --border: 183 100% 10%;
+    --input: 183 100% 10%;
+    --primary: 183 48% 48%;
+    --primary-foreground: 182 40% 99%;
+    --secondary: 183 100% 10%;
+    --secondary-foreground: 183 56% 82%;
+    --accent: 183 100% 10%;
+    --accent-foreground: 183 56% 82%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --ring: 183 48% 48%;
+    --radius: 1rem;
   }
 
   * {
