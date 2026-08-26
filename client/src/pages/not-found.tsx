@@ -10,7 +10,7 @@ export default function NotFound() {
         That page is not here. It may have moved, or the link may be wrong.
       </p>
       <div className="mt-6 flex gap-5 font-mono text-sm">
-        <Link href="/" className="underline underline-offset-4">
+        <Link href="/writing" className="underline underline-offset-4">
           Writing
         </Link>
         <Link href="/about" className="underline underline-offset-4">

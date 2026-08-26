@@ -31,7 +31,7 @@ export default function BlogPostPage() {
       <Column>
       <div className="max-w-measure">
         <p className="mb-4">That post is not here.</p>
-        <Link href="/" className="font-mono text-sm underline underline-offset-4">
+        <Link href="/writing" className="font-mono text-sm underline underline-offset-4">
           Back to writing
         </Link>
       </div>
@@ -62,7 +62,7 @@ export default function BlogPostPage() {
       </div>
 
       <footer className="mt-16 border-t pt-6">
-        <Link href="/" className="font-mono text-sm underline underline-offset-4">
+        <Link href="/writing" className="font-mono text-sm underline underline-offset-4">
           Back to writing
         </Link>
       </footer>

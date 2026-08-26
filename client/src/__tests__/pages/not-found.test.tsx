@@ -22,7 +22,7 @@ describe('NotFound', () => {
 
   it('offers a way back rather than a dead end', () => {
     render(<NotFound />);
-    expect(screen.getByText('Writing')).toHaveAttribute('href', '/');
+    expect(screen.getByText('Writing')).toHaveAttribute('href', '/writing');
     expect(screen.getByText('About')).toHaveAttribute('href', '/about');
     expect(screen.getByText('RSS')).toHaveAttribute('href', '/feed.xml');
   });
