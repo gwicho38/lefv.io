@@ -12,7 +12,7 @@ and no origin — publishing is a git push.
 
 ```bash
 npm run dev         # local Worker on the production runtime (wrangler dev)
-npm test            # vitest, 79 tests
+npm test            # vitest, 102 tests
 npm run lint        # tsc --noEmit
 npm run bake-posts  # regenerate worker/posts.generated.json from markdown
 npm run build       # bake posts + vite build

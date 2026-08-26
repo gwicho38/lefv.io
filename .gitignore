@@ -39,6 +39,9 @@ vite.config.ts.*
 *.sqlite
 *.sqlite3
 
+# Local Worker runtime state
+.wrangler
+
 
 #Ignore vscode AI rules
 .github/instructions/codacy.instructions.md
