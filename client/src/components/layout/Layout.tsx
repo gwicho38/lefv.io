@@ -1,16 +1,18 @@
 import { Navigation } from "./Navigation";
 
-// main is full width so a page can go edge to edge; pages apply Column
-// themselves for anything that belongs in the reading measure.
+// A flex column lets a page fill exactly the space left by the nav, with no
+// magic numbers and nothing to overflow.
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="flex min-h-[100svh] flex-col bg-background">
       <Navigation />
-      <main className="pb-24">{children}</main>
+      <main className="flex flex-1 flex-col">{children}</main>
     </div>
   );
 }
 
+// Bottom padding lives here rather than on main, so a full-height page like
+// the landing screen adds nothing below itself.
 export function Column({ children }: { children: React.ReactNode }) {
-  return <div className="mx-auto max-w-shell px-5">{children}</div>;
+  return <div className="mx-auto w-full max-w-shell px-5 pb-24">{children}</div>;
 }
