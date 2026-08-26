@@ -3,6 +3,7 @@ import { Column } from "@/components/layout/Layout";
 import { Link, useRoute } from "wouter";
 import { format } from "date-fns";
 import ReactMarkdown from "react-markdown";
+import rehypeRaw from "rehype-raw";
 import type { Post } from "@/components/blog/PostIndex";
 
 async function fetchPost(slug: string): Promise<Post & { content: string }> {
@@ -58,7 +59,8 @@ export default function BlogPostPage() {
       </header>
 
       <div className="prose-post">
-        <ReactMarkdown>{post.content}</ReactMarkdown>
+        {/* Posts are authored in this repo, so their HTML is trusted. */}
+        <ReactMarkdown rehypePlugins={[rehypeRaw]}>{post.content}</ReactMarkdown>
       </div>
 
       <footer className="mt-16 border-t pt-6">
