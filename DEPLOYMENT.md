@@ -44,7 +44,7 @@ gitignored because it is generated.
 
 ```bash
 npm run dev      # local Worker on the production runtime
-npm test         # 79 tests
+npm test         # 102 tests
 npm run deploy   # manual deploy, bypassing CI
 ```
 
