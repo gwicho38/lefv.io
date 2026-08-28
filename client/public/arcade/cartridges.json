@@ -1,0 +1,30 @@
+[
+  {
+    "id": "lan-master",
+    "title": "Lan Master",
+    "system": "nes",
+    "author": "Shiru",
+    "year": 2011,
+    "genre": "puzzle",
+    "licence": "CC BY 4.0",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "source": "https://shiru.untergrund.net/software.shtml",
+    "rom": "/arcade/roms/lan-master.nes",
+    "blurb": "Route the signal through every node. Fifty levels, no timer.",
+    "colour": "#c9443a"
+  },
+  {
+    "id": "tobu-tobu-girl",
+    "title": "Tobu Tobu Girl",
+    "system": "gb",
+    "author": "SimonLarsen",
+    "year": 2017,
+    "genre": "platformer",
+    "licence": "MIT",
+    "licenceUrl": "https://github.com/SimonLarsen/tobu-tobu-girl/blob/master/LICENSE",
+    "source": "https://tangramgames.dk/tobutobugirl/",
+    "rom": "/arcade/roms/tobu-tobu-girl.gb",
+    "blurb": "Chase the falling cat up an endless tower.",
+    "colour": "#3f7f6d"
+  }
+]
