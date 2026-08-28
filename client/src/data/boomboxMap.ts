@@ -9,7 +9,7 @@ export const BOOMBOX_PALETTE: Palette = {
   D: "#0e4a42", // cone, outer
   T: "#1f7a68", // cone, mid
   m: "#6fd9a8", // cone, inner
-  M: "#a9efc9", // cone, centre and display glass
+  M: "#a9efc9", // cone, centre
   p: "#6d3a8f", // cassette deck
   c: "#f2e4cf", // key face, screws
   g: "#9c8a72", // key glyph
@@ -22,59 +22,61 @@ const row = (inner: string) => `KK${inner}KK`;
 
 // The cassette window doubles as the display, so it is transparent and the
 // station readout sits behind it.
-export const BOOMBOX_DISPLAY = { x: 20, y: 21, w: 16, h: 4 } as const;
+export const BOOMBOX_DISPLAY = { x: 26, y: 21, w: 20, h: 5 } as const;
 
 // Each transport key is its own map drawn over the body, so it can be pressed.
-export const BOOMBOX_KEYS = { play: 16, pause: 25, stop: 34 } as const;
-export const BOOMBOX_KEY_ROW = 33;
+export const BOOMBOX_KEYS = { play: 24, pause: 33, stop: 42 } as const;
+export const BOOMBOX_KEY_ROW = 38;
 
 const TW_A = "tKKKt", TW_B = "KTMTK", TW_C = "KMmMK";
-const left = (a: string, b: string) => "t" + a + "t" + b + "tt";
-const right = (a: string, b: string) => "tt" + a + "t" + b + "t";
+const leftPanel = (a: string, b: string) => "tt" + a + "tt" + b + rep("t", 6);
+const rightPanel = (a: string, b: string) => rep("t", 6) + a + "tt" + b + "tt";
 
 const WOOFER = [
-  "ddKKKKKKKKdd", "dKTTTTTTTTKd", "KTTDDDDDDTTK", "KTDDDDDDDDTK",
-  "KTDDmmmmDDTK", "KTDDmMMmDDTK", "KTDDmMMmDDTK", "KTDDmmmmDDTK",
-  "KTDDDDDDDDTK", "KTTDDDDDDTTK", "dKTTTTTTTTKd", "ddKKKKKKKKdd",
+  "ddddKKKKKKKKdddd", "ddKKTTTTTTTTKKdd", "dKTTTTTTTTTTTTKd", "KTTTDDDDDDDDTTTK",
+  "KTTDDDDDDDDDDTTK", "KTDDDDmmmmDDDDTK", "KTDDDmMMMMmDDDTK", "KTDDDmMMMMmDDDTK",
+  "KTDDDmMMMMmDDDTK", "KTDDDmMMMMmDDDTK", "KTDDDDmmmmDDDDTK", "KTTDDDDDDDDDDTTK",
+  "KTTTDDDDDDDDTTTK", "dKTTTTTTTTTTTTKd", "ddKKTTTTTTTTKKdd", "ddddKKKKKKKKdddd",
 ];
 
 const DECK = [
-  "dd" + rep("K", 20) + "dd",
-  "ddK" + rep("p", 18) + "Kdd",
+  "dd" + rep("K", 24) + "dd",
+  "ddK" + rep("p", 22) + "Kdd",
   ...Array.from({ length: BOOMBOX_DISPLAY.h }, () =>
     "ddKp" + rep(".", BOOMBOX_DISPLAY.w) + "pKdd"),
-  "ddK" + rep("p", 18) + "Kdd",
-  "ddK" + "pc" + rep("p", 14) + "cp" + "Kdd",
-  "ddK" + rep("p", 18) + "Kdd",
-  "ddK" + rep("p", 18) + "Kdd",
-  "dd" + rep("K", 20) + "dd",
-  "dd" + rep("d", 20) + "dd",
+  "ddK" + rep("p", 22) + "Kdd",
+  "ddK" + "pc" + rep("p", 18) + "cp" + "Kdd",
+  "ddK" + rep("p", 22) + "Kdd",
+  "ddK" + rep("p", 22) + "Kdd",
+  "dd" + rep("K", 24) + "dd",
+  ...Array.from({ length: 4 }, () => "dd" + rep("d", 24) + "dd"),
 ];
 
+// 72 x 49, matching the console: the two units are the same shape.
 export const BOOMBOX_MAP: PixelMap = [
-  rep(".", 14) + rep("K", 28) + rep(".", 14),
-  rep(".", 14) + "K" + rep(".", 26) + "K" + rep(".", 14),
-  rep(".", 13) + "KmK" + rep(".", 24) + "KmK" + rep(".", 13),
-  rep(".", 13) + "KmK" + rep(".", 3) + rep("b", 18) + rep(".", 3) + "KmK" + rep(".", 13),
-  rep(".", 13) + "KmK" + rep(".", 24) + "KmK" + rep(".", 13),
-  rep(".", 13) + "KmK" + rep(".", 24) + "KmK" + rep(".", 13),
-  rep(".", 13) + "KmK" + rep(".", 24) + "KmK" + rep(".", 13),
-  rep("K", 56),
-  row(rep("l", 52)),
-  row(rep("t", 52)),
-  row(left(TW_A, TW_A) + rep("t", 24) + right(TW_A, TW_A)),
-  row(left(TW_B, TW_B) + "t" + rep("b", 22) + "t" + right(TW_B, TW_B)),
-  row(left(TW_C, TW_C) + rep("t", 24) + right(TW_C, TW_C)),
-  row(left(TW_B, TW_B) + "t" + rep("b", 22) + "t" + right(TW_B, TW_B)),
-  row(left(TW_A, TW_A) + rep("t", 24) + right(TW_A, TW_A)),
-  row(rep("t", 15) + rep("b", 16) + rep("t", 21)),
-  row(rep("t", 52)),
-  row(rep("d", 52)),
-  row("dc" + rep("d", 48) + "cd"),
-  ...WOOFER.map((w, i) => row("d" + w + "d" + DECK[i] + "d" + w + "d")),
-  row("dc" + rep("d", 48) + "cd"),
-  ...Array.from({ length: 8 }, () => row(rep("d", 52))),
-  rep("K", 56),
+  rep(".", 18) + rep("K", 36) + rep(".", 18),
+  rep(".", 18) + "K" + rep(".", 34) + "K" + rep(".", 18),
+  rep(".", 17) + "KmK" + rep(".", 32) + "KmK" + rep(".", 17),
+  rep(".", 17) + "KmK" + rep(".", 4) + rep("b", 24) + rep(".", 4) + "KmK" + rep(".", 17),
+  rep(".", 17) + "KmK" + rep(".", 32) + "KmK" + rep(".", 17),
+  rep(".", 17) + "KmK" + rep(".", 32) + "KmK" + rep(".", 17),
+  rep(".", 17) + "KmK" + rep(".", 32) + "KmK" + rep(".", 17),
+  rep("K", 72),
+  row(rep("l", 68)),
+  row(rep("t", 68)),
+  row(leftPanel(TW_A, TW_A) + rep("t", 28) + rightPanel(TW_A, TW_A)),
+  row(leftPanel(TW_B, TW_B) + "tt" + rep("b", 24) + "tt" + rightPanel(TW_B, TW_B)),
+  row(leftPanel(TW_C, TW_C) + rep("t", 28) + rightPanel(TW_C, TW_C)),
+  row(leftPanel(TW_B, TW_B) + "tt" + rep("b", 24) + "tt" + rightPanel(TW_B, TW_B)),
+  row(leftPanel(TW_A, TW_A) + rep("t", 28) + rightPanel(TW_A, TW_A)),
+  row(rep("t", 22) + rep("b", 18) + rep("t", 28)),
+  row(rep("t", 68)),
+  row(rep("d", 68)),
+  row("dc" + rep("d", 64) + "cd"),
+  ...WOOFER.map((w, i) => row("dd" + w + "dd" + DECK[i] + "dd" + w + "dd")),
+  row("dc" + rep("d", 64) + "cd"),
+  ...Array.from({ length: 12 }, () => row(rep("d", 68))),
+  rep("K", 72),
 ];
 
 export const KEY_MAPS = {

@@ -2,13 +2,14 @@ import { CONSOLE_MAP, CONSOLE_PALETTE, CONSOLE_SCREEN } from '@/data/consoleMap'
 import { mapSize, toRects } from '@/lib/pixels';
 
 describe('CONSOLE_MAP', () => {
-  it('is 56 wide and 52 tall', () => {
-    expect(mapSize(CONSOLE_MAP)).toEqual({ width: 56, height: 52 });
+  it('is landscape, so widening it does not make it tall', () => {
+    const { width, height } = mapSize(CONSOLE_MAP);
+    expect(width).toBeGreaterThan(height);
   });
 
   it('has every row the same width', () => {
-    const widths = new Set(CONSOLE_MAP.map(r => r.length));
-    expect([...widths]).toEqual([56]);
+    const { width } = mapSize(CONSOLE_MAP);
+    expect([...new Set(CONSOLE_MAP.map(r => r.length))]).toEqual([width]);
   });
 
   it('uses only characters the palette defines', () => {

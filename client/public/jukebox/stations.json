@@ -130,5 +130,16 @@
     "bitrate": 320,
     "cors": false,
     "colour": "#7a4a86"
+  },
+  {
+    "id": "salsa-100",
+    "name": "100% Salsa",
+    "city": "Spain",
+    "genre": "salsa",
+    "url": "https://stm01.streammaximum.com:8194/;",
+    "codec": "MP3",
+    "bitrate": 128,
+    "cors": false,
+    "colour": "#d4482f"
   }
 ]

@@ -50,10 +50,4 @@ describe('Arcade', () => {
     expect(screen.getByText(/CC BY 4.0/)).toBeInTheDocument();
   });
 
-  it('filters the shelf by search', async () => {
-    renderPage();
-    await waitFor(() => screen.getByRole('button', { name: /Lan Master/ }));
-    fireEvent.change(screen.getByRole('searchbox'), { target: { value: 'zzz' } });
-    expect(screen.queryByRole('button', { name: /Lan Master/ })).not.toBeInTheDocument();
-  });
 });

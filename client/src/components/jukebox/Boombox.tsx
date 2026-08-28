@@ -80,6 +80,8 @@ export function Boombox({ transport, levels, onPlay, onPause, onStop, children }
               aria-label={name}
               aria-pressed={down}
               className="cursor-pointer"
+              // Focus on keyboard only: a focused <g> draws the browser's highlight.
+              onMouseDown={e => e.preventDefault()}
               onClick={handlers[name]}
               onKeyDown={e => {
                 if (e.key === "Enter" || e.key === " ") {

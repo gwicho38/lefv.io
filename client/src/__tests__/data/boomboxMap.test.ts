@@ -4,12 +4,14 @@ import {
 import { mapSize, toRects } from '@/lib/pixels';
 
 describe('BOOMBOX_MAP', () => {
-  it('is 56 wide', () => {
-    expect(mapSize(BOOMBOX_MAP).width).toBe(56);
+  it('is landscape', () => {
+    const { width, height } = mapSize(BOOMBOX_MAP);
+    expect(width).toBeGreaterThan(height);
   });
 
   it('has every row the same width', () => {
-    expect([...new Set(BOOMBOX_MAP.map(r => r.length))]).toEqual([56]);
+    const { width } = mapSize(BOOMBOX_MAP);
+    expect([...new Set(BOOMBOX_MAP.map(r => r.length))]).toEqual([width]);
   });
 
   it('uses only characters the palette defines', () => {
@@ -49,9 +51,9 @@ describe('transport keys', () => {
   });
 
   it('keeps every key inside the body', () => {
-    const { height } = mapSize(BOOMBOX_MAP);
+    const { width, height } = mapSize(BOOMBOX_MAP);
     for (const x of Object.values(BOOMBOX_KEYS)) {
-      expect(x + 6).toBeLessThanOrEqual(56);
+      expect(x + 6).toBeLessThanOrEqual(width);
     }
     expect(BOOMBOX_KEY_ROW + 7).toBeLessThanOrEqual(height);
   });
@@ -59,5 +61,12 @@ describe('transport keys', () => {
   it('does not overlap two keys', () => {
     const xs = Object.values(BOOMBOX_KEYS).sort((a, b) => a - b);
     for (let i = 1; i < xs.length; i++) expect(xs[i] - xs[i - 1]).toBeGreaterThanOrEqual(6);
+  });
+});
+
+describe('the two units', () => {
+  it('are the same shape as each other', async () => {
+    const { CONSOLE_MAP } = await import('@/data/consoleMap');
+    expect(mapSize(BOOMBOX_MAP)).toEqual(mapSize(CONSOLE_MAP));
   });
 });

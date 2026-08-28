@@ -1,8 +1,9 @@
-import { useMemo, useState } from "react";
+
 import { useQuery } from "@tanstack/react-query";
 import { Boombox } from "@/components/jukebox/Boombox";
 import { useRadio } from "@/components/jukebox/useRadio";
-import { fetchStations, filterStations, type Station } from "@/lib/stations";
+import { fetchStations, type Station } from "@/lib/stations";
+import { CABINET_WIDTH } from "@/lib/cabinet";
 
 const STATE_LABEL: Record<string, string> = {
   stopped: "OFF AIR",
@@ -13,7 +14,6 @@ const STATE_LABEL: Record<string, string> = {
 };
 
 export default function Jukebox() {
-  const [query, setQuery] = useState("");
 
   const { data } = useQuery<Station[]>({
     queryKey: ["/jukebox/stations.json"],
@@ -21,23 +21,15 @@ export default function Jukebox() {
   });
 
   const all = data ?? [];
-  const visible = useMemo(() => filterStations(all, query), [all, query]);
   const { station: selected, transport, levels, tuneTo, play, pause, stop } = useRadio();
 
   return (
     <div className="mx-auto w-full max-w-[72rem] px-5 pb-10">
       <h1 className="mb-4 font-serif text-2xl font-bold tracking-tight">Jukebox</h1>
 
-      <input
-        type="search"
-        value={query}
-        onChange={e => setQuery(e.target.value)}
-        placeholder="Search stations"
-        className="mb-5 w-full border-b border-border bg-transparent pb-2 font-mono text-xs outline-none placeholder:text-muted-foreground"
-      />
 
-      <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-center sm:gap-5">
-        <div className="flex w-[min(100%,calc((100svh-21rem)*56/41))] min-w-0 flex-col">
+      <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-center sm:gap-10">
+        <div className={`flex ${CABINET_WIDTH} min-w-0 flex-col`}>
           <p className="mb-2 h-3 font-mono text-[8px] tracking-wide text-muted-foreground">
             {selected ? `${selected.name.toUpperCase()} · ${STATE_LABEL[transport]}` : "NO STATION"}
           </p>
@@ -68,7 +60,7 @@ export default function Jukebox() {
         <div className="w-full sm:w-56 sm:flex-none">
           <p className="mb-2 h-3 font-mono text-[8px] tracking-wide text-muted-foreground">STATIONS</p>
           <div className="flex flex-wrap gap-2">
-            {visible.map(s => (
+            {all.map(s => (
               <button
                 key={s.id}
                 type="button"

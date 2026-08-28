@@ -3,6 +3,14 @@ import type { Cartridge } from "@/lib/cartridges";
 
 type Status = "idle" | "loading" | "running" | "error";
 
+// EmulatorJS runs Game Boy Color through gambatte, which it calls "gb"; there
+// is no "gbc" core, and asking for one 404s.
+const CORES: Readonly<Record<string, string>> = { gbc: "gb" };
+
+// Upstream's build, not a vendored copy: the repo ships source only, so the
+// minified bundle and the cores exist solely on the CDN.
+const EJS_DATA = "https://cdn.emulatorjs.org/stable/data/";
+
 // EmulatorJS reads these globals when its loader runs; it has no module API.
 interface EmulatorGlobals {
   EJS_player?: string;
@@ -49,17 +57,17 @@ export function useEmulator(cartridge: Cartridge | null) {
     const globals = window as unknown as EmulatorGlobals;
     teardown(globals, containerRef.current);
     globals.EJS_player = "#emulator";
-    globals.EJS_core = cartridge.system;
+    globals.EJS_core = CORES[cartridge.system] ?? cartridge.system;
     globals.EJS_gameUrl = cartridge.rom;
     globals.EJS_gameName = cartridge.title;
-    globals.EJS_pathtodata = "/arcade/emulatorjs/";
+    globals.EJS_pathtodata = EJS_DATA;
     globals.EJS_startOnLoaded = true;
 
     // loader.js declares globals, so a classic re-run throws "already declared".
     // A module gets its own scope, and a unique URL forces a fresh evaluation.
     const script = document.createElement("script");
     script.type = "module";
-    script.src = `/arcade/emulatorjs/loader.js?cartridge=${encodeURIComponent(cartridge.id)}`;
+    script.src = `${EJS_DATA}loader.js?cartridge=${encodeURIComponent(cartridge.id)}`;
     script.dataset.ejs = cartridge.id;
     script.onload = () => setStatus("running");
     script.onerror = () => setStatus("error");
