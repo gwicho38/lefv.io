@@ -5,7 +5,7 @@ import type { Cartridge } from '@/lib/cartridges';
 
 const carts: Cartridge[] = [{
   id: 'lan', title: 'Lan Master', system: 'nes', author: 'Shiru', year: 2011,
-  genre: 'puzzle', licence: 'CC BY 4.0', licenceUrl: '', source: '',
+  genre: 'puzzle', licence: 'CC BY 4.0', licenceUrl: 'https://example.test/cc', source: '',
   rom: '/lan.nes', blurb: 'Route the signal.', colour: '#c9443a',
 }];
 
@@ -19,10 +19,10 @@ beforeEach(() => {
 });
 
 describe('Arcade', () => {
-  it('renders the three pane labels', async () => {
+  it('renders the shelf label and the empty console state', async () => {
     renderPage();
     await waitFor(() => expect(screen.getByText('SHELF')).toBeInTheDocument());
-    expect(screen.getByText('CARTRIDGE')).toBeInTheDocument();
+    expect(screen.getByText('NO CARTRIDGE')).toBeInTheDocument();
   });
 
   it('lists cartridges from the manifest', async () => {
@@ -30,11 +30,24 @@ describe('Arcade', () => {
     await waitFor(() => expect(screen.getByRole('button', { name: /Lan Master/ })).toBeInTheDocument());
   });
 
-  it('shows a cartridge in the detail pane once selected', async () => {
+  it('names the running cartridge and offers eject once selected', async () => {
     renderPage();
     await waitFor(() => screen.getByRole('button', { name: /Lan Master/ }));
     fireEvent.click(screen.getByRole('button', { name: /Lan Master/ }));
-    expect(screen.getByText('Route the signal.')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'eject' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'CC BY 4.0' })).toBeInTheDocument();
+  });
+
+  it('prints the licence as plain text when it has no url', async () => {
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => [{ ...carts[0], licenceUrl: '' }],
+    }) as never;
+    renderPage();
+    await waitFor(() => screen.getByRole('button', { name: /Lan Master/ }));
+    fireEvent.click(screen.getByRole('button', { name: /Lan Master/ }));
+    expect(screen.queryByRole('link', { name: 'CC BY 4.0' })).not.toBeInTheDocument();
+    expect(screen.getByText(/CC BY 4.0/)).toBeInTheDocument();
   });
 
   it('filters the shelf by search', async () => {

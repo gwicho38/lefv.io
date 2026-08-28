@@ -61,6 +61,7 @@ for (const alias of FEED_ALIASES) {
 const isAppRoute = (path: string) =>
   path === "/" ||
   path === "/writing" ||
+  path === "/arcade" ||
   path === "/about" ||
   path === "/blog" ||
   published.some(post => path === `/blog/${post.slug}`);

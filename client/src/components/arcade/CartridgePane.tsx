@@ -9,7 +9,7 @@ export function CartridgePane({ cartridge, onEject }: Props) {
   if (!cartridge) {
     return (
       <p className="font-serif text-xs text-muted-foreground">
-        Pick one from the shelf, or drop in a file of your own.
+        Pick one from the shelf.
       </p>
     );
   }

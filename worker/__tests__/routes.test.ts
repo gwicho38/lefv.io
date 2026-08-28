@@ -36,7 +36,7 @@ describe('feed', () => {
 });
 
 describe('status codes', () => {
-  it.each(['/', '/writing', '/about', '/blog'])('serves %s as a real page', async path => {
+  it.each(['/', '/writing', '/arcade', '/about', '/blog'])('serves %s as a real page', async path => {
     expect((await get(path)).status).toBe(200);
   });
 
