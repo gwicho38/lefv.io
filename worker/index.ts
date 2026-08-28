@@ -62,6 +62,7 @@ const isAppRoute = (path: string) =>
   path === "/" ||
   path === "/writing" ||
   path === "/arcade" ||
+  path === "/jukebox" ||
   path === "/about" ||
   path === "/blog" ||
   published.some(post => path === `/blog/${post.slug}`);

@@ -7,7 +7,7 @@
     "url": "https://streams.radio.co/se1a320b47/listen",
     "codec": "MP3",
     "bitrate": 192,
-    "cors": true,
+    "cors": false,
     "colour": "#2f6f96"
   },
   {
@@ -18,7 +18,7 @@
     "url": "https://orf-live.ors-shoutcast.at/fm4-q2a",
     "codec": "MP3",
     "bitrate": 192,
-    "cors": true,
+    "cors": false,
     "colour": "#c9443a"
   },
   {
@@ -29,7 +29,7 @@
     "url": "https://radioclassique.ice.infomaniak.ch/radioclassique-high.mp3",
     "codec": "MP3",
     "bitrate": 128,
-    "cors": true,
+    "cors": false,
     "colour": "#4a5aa8"
   },
   {
@@ -40,7 +40,7 @@
     "url": "https://centova5.transmissaodigital.com:20104/live",
     "codec": "MP3",
     "bitrate": 64,
-    "cors": true,
+    "cors": false,
     "colour": "#5c7a3f"
   },
   {
@@ -51,7 +51,7 @@
     "url": "https://az1.mediacp.eu/listen/airport-lounge-radio/radio.mp3",
     "codec": "MP3",
     "bitrate": 128,
-    "cors": true,
+    "cors": false,
     "colour": "#3f7f6d"
   },
   {
@@ -62,7 +62,7 @@
     "url": "https://nr9.newradio.it/proxy/ebaruffa?mp=/stream",
     "codec": "MP3",
     "bitrate": 128,
-    "cors": true,
+    "cors": false,
     "colour": "#6b6b6b"
   },
   {
@@ -73,7 +73,7 @@
     "url": "https://novazz.ice.infomaniak.ch/novazz-128.mp3",
     "codec": "MP3",
     "bitrate": 128,
-    "cors": true,
+    "cors": false,
     "colour": "#a8563f"
   },
   {
@@ -84,7 +84,7 @@
     "url": "https://maggie.torontocast.com:2020/stream/reggaechillcafe",
     "codec": "MP3",
     "bitrate": 128,
-    "cors": true,
+    "cors": false,
     "colour": "#2d6b3f"
   },
   {
@@ -106,7 +106,7 @@
     "url": "https://mpc1.mediacp.eu:8356/stream",
     "codec": "MP3",
     "bitrate": 128,
-    "cors": true,
+    "cors": false,
     "colour": "#8a4a1a"
   },
   {
@@ -117,7 +117,7 @@
     "url": "https://cast1.torontocast.com:4560/stream",
     "codec": "MP3",
     "bitrate": 128,
-    "cors": true,
+    "cors": false,
     "colour": "#1f7a68"
   },
   {
@@ -128,7 +128,7 @@
     "url": "https://funkyradio.streamingmedia.it/play.mp3",
     "codec": "MP3",
     "bitrate": 320,
-    "cors": true,
+    "cors": false,
     "colour": "#7a4a86"
   }
 ]

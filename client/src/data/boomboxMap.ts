@@ -77,8 +77,10 @@ export const BOOMBOX_MAP: PixelMap = [
   rep("K", 56),
 ];
 
-export const KEY_MAPS: Readonly<Record<string, PixelMap>> = {
+export const KEY_MAPS = {
   play: ["KKKKKK", "KccccK", "KcgccK", "KcggcK", "KcgccK", "KccccK", "KKKKKK"],
   pause: ["KKKKKK", "KccccK", "KcgcgK", "KcgcgK", "KcgcgK", "KccccK", "KKKKKK"],
   stop: ["KKKKKK", "KccccK", "KcggcK", "KcggcK", "KcggcK", "KccccK", "KKKKKK"],
-};
+} satisfies Readonly<Record<string, PixelMap>>;
+
+export type TransportKey = keyof typeof KEY_MAPS;
