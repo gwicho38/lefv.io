@@ -8,22 +8,30 @@ interface Props {
 
 export function CartridgeShelf({ cartridges, selectedId, onSelect }: Props) {
   return (
-    <div className="grid grid-cols-[repeat(auto-fill,minmax(104px,1fr))] gap-3">
+    <div className="flex flex-wrap gap-2">
       {cartridges.map(c => (
         <button
           key={c.id}
           type="button"
           aria-pressed={c.id === selectedId}
           onClick={() => onSelect(c.id)}
-          style={{ backgroundColor: c.colour }}
-          className={`flex aspect-[5/6] flex-col justify-between rounded-sm rounded-b p-2 text-left ${
-            c.id === selectedId ? "outline outline-2 outline-offset-2 outline-primary" : ""
+          title={`${c.title} · ${c.system.toUpperCase()}`}
+          aria-label={`${c.title}, ${c.system.toUpperCase()}`}
+          className={`flex w-full items-center gap-2 rounded-full border px-3 py-1.5 text-left transition-colors ${
+            c.id === selectedId
+              ? "border-foreground/40 bg-foreground/5 text-foreground"
+              : "border-border text-muted-foreground hover:text-foreground"
           }`}
         >
-          <span className="rounded-sm bg-[#f6f2e8] px-1.5 py-1 font-mono text-[10px] leading-tight text-[#2a2118]">
-            {c.title}
+          <span
+            aria-hidden
+            className="h-2.5 w-2.5 flex-none rounded-full"
+            style={{ backgroundColor: c.colour }}
+          />
+          <span className="truncate font-mono text-[11px]">{c.title}</span>
+          <span className="ml-auto flex-none font-mono text-[9px] uppercase text-muted-foreground">
+            {c.system}
           </span>
-          <span className="h-2 rounded-sm bg-black/25" />
         </button>
       ))}
     </div>

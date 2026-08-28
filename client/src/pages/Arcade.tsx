@@ -71,7 +71,7 @@ export default function Arcade() {
         )}
         </div>
 
-        <div className="w-full sm:w-40 sm:flex-none">
+        <div className="w-full sm:w-56 sm:flex-none">
           <p className="mb-2 h-3 font-mono text-[8px] tracking-wide text-muted-foreground">SHELF</p>
           <CartridgeShelf
             cartridges={visible}
