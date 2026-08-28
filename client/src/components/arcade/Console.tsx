@@ -23,7 +23,7 @@ export function Console({ children }: { children?: React.ReactNode }) {
       <svg
         viewBox={`0 0 ${width} ${height}`}
         shapeRendering="crispEdges"
-        className="relative block w-full"
+        className="pointer-events-none relative block w-full"
         role="presentation"
       >
         {rects.map((r, i) => (
