@@ -14,20 +14,6 @@
     "colour": "#7a4a86"
   },
   {
-    "id": "ucity",
-    "title": "\u00b5City",
-    "system": "gbc",
-    "author": "Antonio Ni\u00f1o D\u00edaz",
-    "year": 2021,
-    "genre": "city builder",
-    "licence": "GPL-3.0",
-    "licenceUrl": "https://github.com/AntonioND/ucity/blob/master/LICENSE",
-    "source": "https://github.com/AntonioND/ucity",
-    "rom": "/arcade/roms/ucity.gbc",
-    "blurb": "Zone it, wire it, tax it. A city simulator that fits in a Game Boy cartridge.",
-    "colour": "#2f6f96"
-  },
-  {
     "id": "bitcity",
     "title": "BitCity",
     "system": "gbc",
@@ -40,6 +26,20 @@
     "rom": "/arcade/roms/bitcity.gbc",
     "blurb": "\u00b5City's smaller sibling: watch a city grow on its own and nudge it along.",
     "colour": "#4a5aa8"
+  },
+  {
+    "id": "ucity",
+    "title": "\u00b5City",
+    "system": "gbc",
+    "author": "Antonio Ni\u00f1o D\u00edaz",
+    "year": 2021,
+    "genre": "city builder",
+    "licence": "GPL-3.0",
+    "licenceUrl": "https://github.com/AntonioND/ucity/blob/master/LICENSE",
+    "source": "https://github.com/AntonioND/ucity",
+    "rom": "/arcade/roms/ucity.gbc",
+    "blurb": "Zone it, wire it, tax it. A city simulator that fits in a Game Boy cartridge.",
+    "colour": "#2f6f96"
   },
   {
     "id": "libbet",
@@ -56,20 +56,6 @@
     "colour": "#3f7f6d"
   },
   {
-    "id": "thwaite",
-    "title": "Thwaite",
-    "system": "nes",
-    "author": "Damian Yerrick",
-    "year": 2011,
-    "genre": "action",
-    "licence": "GPL-3.0",
-    "licenceUrl": "https://github.com/pinobatch/thwaite-nes/blob/master/docs/COPYING.md",
-    "source": "https://github.com/pinobatch/thwaite-nes",
-    "rom": "/arcade/roms/thwaite.nes",
-    "blurb": "Shoot down incoming missiles before they reach the town. One town, no second chances.",
-    "colour": "#c9443a"
-  },
-  {
     "id": "rhde",
     "title": "RHDE",
     "system": "nes",
@@ -82,5 +68,47 @@
     "rom": "/arcade/roms/rhde.nes",
     "blurb": "Lay out a farmhouse, then defend it. Two players share one screen and one plot of land.",
     "colour": "#a8563f"
+  },
+  {
+    "id": "roborun",
+    "title": "RoboRun",
+    "system": "nes",
+    "author": "heaven-hm",
+    "year": 2023,
+    "genre": "platformer",
+    "licence": "GPL-3.0",
+    "licenceUrl": "https://github.com/heaven-hm/roborun-nes/blob/main/LICENSE",
+    "source": "https://github.com/heaven-hm/roborun-nes",
+    "rom": "/arcade/roms/RoboRun-NES_1.1.nes",
+    "blurb": "Run, jump and don't stop. A short, fast NES platformer.",
+    "colour": "#b8862f"
+  },
+  {
+    "id": "rfk",
+    "title": "robotfindskitten",
+    "system": "nes",
+    "author": "Damian Yerrick",
+    "year": 2015,
+    "genre": "zen",
+    "licence": "Zlib",
+    "licenceUrl": "https://github.com/pinobatch/rfk-nes",
+    "source": "https://github.com/pinobatch/rfk-nes",
+    "rom": "/arcade/roms/robotfindskitten.nes",
+    "blurb": "A robot wanders a field of objects looking for a kitten. Nothing else happens. That is the game.",
+    "colour": "#5c7a3f"
+  },
+  {
+    "id": "thwaite",
+    "title": "Thwaite",
+    "system": "nes",
+    "author": "Damian Yerrick",
+    "year": 2011,
+    "genre": "action",
+    "licence": "GPL-3.0",
+    "licenceUrl": "https://github.com/pinobatch/thwaite-nes/blob/master/docs/COPYING.md",
+    "source": "https://github.com/pinobatch/thwaite-nes",
+    "rom": "/arcade/roms/thwaite.nes",
+    "blurb": "Shoot down incoming missiles before they reach the town. One town, no second chances.",
+    "colour": "#c9443a"
   }
 ]
