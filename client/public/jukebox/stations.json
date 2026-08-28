@@ -1,0 +1,145 @@
+[
+  {
+    "id": "cafe-del-mar",
+    "name": "Caf\u00e9 del Mar",
+    "city": "Ibiza",
+    "genre": "chillout",
+    "url": "https://streams.radio.co/se1a320b47/listen",
+    "codec": "MP3",
+    "bitrate": 192,
+    "cors": false,
+    "colour": "#2f6f96"
+  },
+  {
+    "id": "fm4",
+    "name": "FM4",
+    "city": "Vienna",
+    "genre": "alternative",
+    "url": "https://orf-live.ors-shoutcast.at/fm4-q2a",
+    "codec": "MP3",
+    "bitrate": 192,
+    "cors": false,
+    "colour": "#c9443a"
+  },
+  {
+    "id": "radio-classique",
+    "name": "Radio Classique",
+    "city": "Paris",
+    "genre": "classical",
+    "url": "https://radioclassique.ice.infomaniak.ch/radioclassique-high.mp3",
+    "codec": "MP3",
+    "bitrate": 128,
+    "cors": false,
+    "colour": "#4a5aa8"
+  },
+  {
+    "id": "bossa-jazz",
+    "name": "Bossa Jazz Brasil",
+    "city": "Brazil",
+    "genre": "bossa nova",
+    "url": "https://centova5.transmissaodigital.com:20104/live",
+    "codec": "MP3",
+    "bitrate": 64,
+    "cors": false,
+    "colour": "#5c7a3f"
+  },
+  {
+    "id": "airport-lounge",
+    "name": "Airport Lounge",
+    "city": "Canada",
+    "genre": "ambient",
+    "url": "https://az1.mediacp.eu/listen/airport-lounge-radio/radio.mp3",
+    "codec": "MP3",
+    "bitrate": 128,
+    "cors": false,
+    "colour": "#3f7f6d"
+  },
+  {
+    "id": "neu-radio",
+    "name": "NEU Radio",
+    "city": "Bologna",
+    "genre": "ambient",
+    "url": "https://nr9.newradio.it/proxy/ebaruffa?mp=/stream",
+    "codec": "MP3",
+    "bitrate": 128,
+    "cors": false,
+    "colour": "#6b6b6b"
+  },
+  {
+    "id": "radio-nova",
+    "name": "Radio Nova",
+    "city": "Paris",
+    "genre": "eclectic",
+    "url": "https://novazz.ice.infomaniak.ch/novazz-128.mp3",
+    "codec": "MP3",
+    "bitrate": 128,
+    "cors": false,
+    "colour": "#a8563f"
+  },
+  {
+    "id": "reggae-chill",
+    "name": "Reggae Chill Caf\u00e9",
+    "city": "Canada",
+    "genre": "reggae",
+    "url": "https://maggie.torontocast.com:2020/stream/reggaechillcafe",
+    "codec": "MP3",
+    "bitrate": 128,
+    "cors": false,
+    "colour": "#2d6b3f"
+  },
+  {
+    "id": "fm80-funky",
+    "name": "FM80 Funky",
+    "city": "France",
+    "genre": "funk",
+    "url": "https://listen.radioking.com/radio/467555/stream/523739",
+    "codec": "MP3",
+    "bitrate": 192,
+    "cors": true,
+    "colour": "#b8862f"
+  },
+  {
+    "id": "acid-jazz",
+    "name": "100% Acid Jazz",
+    "city": "Canada",
+    "genre": "acid jazz",
+    "url": "https://mpc1.mediacp.eu:8356/stream",
+    "codec": "MP3",
+    "bitrate": 128,
+    "cors": false,
+    "colour": "#8a4a1a"
+  },
+  {
+    "id": "rdmix-djset",
+    "name": "RdMix DJ Set",
+    "city": "Canada",
+    "genre": "disco",
+    "url": "https://cast1.torontocast.com:4560/stream",
+    "codec": "MP3",
+    "bitrate": 128,
+    "cors": false,
+    "colour": "#1f7a68"
+  },
+  {
+    "id": "funky-radio",
+    "name": "Funky Radio",
+    "city": "Italy",
+    "genre": "funk",
+    "url": "https://funkyradio.streamingmedia.it/play.mp3",
+    "codec": "MP3",
+    "bitrate": 320,
+    "cors": false,
+    "colour": "#7a4a86"
+  },
+  {
+    "id": "salsa-100",
+    "name": "100% Salsa",
+    "city": "Spain",
+    "genre": "salsa",
+    "url": "https://stm01.streammaximum.com:8194/;",
+    "codec": "MP3",
+    "bitrate": 128,
+    "cors": false,
+    "colour": "#d4482f"
+  }
+]

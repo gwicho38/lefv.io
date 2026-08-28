@@ -51,3 +51,6 @@ vite.config.ts.*
 !.env.*.example
 
 worker/posts.generated.json
+
+# Visual brainstorming companion scratch
+.superpowers/
